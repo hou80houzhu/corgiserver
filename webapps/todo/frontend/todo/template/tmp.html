@@ -1,0 +1,23 @@
+<!--[base]-->
+<div class="base-head">
+    <div class="base-head-input"><input type="text" data-find="input"/></div>
+    <div class="base-head-btn" data-find="btn">
+        <i class="fa fa-check"></i>
+        <i class="fa fa-sync"></i>
+    </div>
+</div>
+<div class="base-body" data-find="body">
+    <@include data="{{option.list}}" template="{{option.template}}"/>
+</div>
+<!--[list]-->
+<div class="list-items">
+    <%for(var i in data){%>
+    <div class="list-items-item" data-group="item" @cache(data[i])>
+        <div class="list-items-item-desc"><%=data[i].content;%></div>
+        <div class="list-items-item-del" data-groupi="btn">
+            <i class="fa fa-close"></i>
+            <i class="fa fa-sync"></i>
+        </div>
+    </div>
+    <%}%>
+</div>

@@ -1,0 +1,22 @@
+{
+  "name": "corgiserver",
+  "version": "0.0.1",
+  "description": "A web server running javascript like tomcat.",
+  "main": "lib/server.js",
+  "bin": { "corgiserver": "bin/corgiserver.js" },
+  "license": "MIT",
+  "keywords": [
+    "webserver",
+    "mvc",
+    "functional",
+    "server",
+    "corgi"
+  ],
+  "author": "hou80houzhu",
+  "contributors": [],
+  "dependencies": {
+    "formidable": "^1.0.17",
+    "mysql": "^2.10.2",
+    "request": "^2.69.0"
+  }
+}
