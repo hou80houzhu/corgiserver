@@ -1,4 +1,10 @@
-![corgiserver](https://github.com/hou80houzhu/corgiserver/raw/master/conf/pages/corgiserver.png) [![Build Status](https://travis-ci.org/hou80houzhu/corgiserver.svg?branch=master)](https://travis-ci.org/hou80houzhu/corgiserver)
+![corgiserver](https://github.com/hou80houzhu/corgiserver/raw/master/conf/pages/corgiserver.png) [![Build Status](https://travis-ci.org/hou80houzhu/corgiserver.svg?branch=master)](https://travis-ci.org/hou80houzhu/corgiserver) [node](http://nodejs.org).
+
+  [![NPM Version][npm-image]][npm-url]
+  [![NPM Downloads][downloads-image]][downloads-url]
+  [![Linux Build][travis-image]][travis-url]
+  [![Windows Build][appveyor-image]][appveyor-url]
+  [![Test Coverage][coveralls-image]][coveralls-url]
 
 ###A web server running javascript like tomcat.
 
