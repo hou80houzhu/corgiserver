@@ -1,0 +1,3 @@
+<div>HOST:<%=request.getHeaders().getHost();%></div>
+<div>URL:<%=request.getURL();%></div>
+<@include path="test3.nsp"/>

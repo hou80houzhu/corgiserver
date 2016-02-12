@@ -1,0 +1,9 @@
+<!--[user]-->
+<%for(var i in data.users){%>
+<div style="margin:20px;border:1px solid #D7D7D7;">
+    <div class="">username:<%=data.users[i].username;%></div>
+    <div class="">password:<%=data.users[i].password;%></div>
+    <div class="">id:<%=data.users[i].id;%></div>
+    <div class="">role:<%=data.users[i].role;%></div>
+</div>
+<%}%>

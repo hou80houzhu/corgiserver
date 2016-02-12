@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>brooder</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+        <meta name="format-detection" content="telephone=no">
+        <meta name="apple-mobile-web-app-status-bar-style" content="white">
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/144.png">
+        <link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/114.png">
+        <link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/72.png">
+        <link rel="apple-touch-icon-precomposed" sizes="57x57" href="images/57.png">
+        <link rel="shortcut icon" href="images/144.png">
+        <script src="brooder.js" type="text/javascript"></script>
+        <script>
+            window.basePath = "";
+            var boot = $.App({"basePath":"packet/","debug":false,"update":49}), _a = "option.root", _b = "option.root.pc";
+            var _a = "option.root", _b = "option.root.pc";
+            if ($.browser.isMobile()) {
+                _a = "option.mobi";
+                _b = "option.mobi.root";
+            }
+            boot.setImportListener(_a, {
+                onimportstart: function (e) {
+                    $("<div id='welcome' style='position:absolute;z-index:999999999;left:0;top:0;right:0;bottom:0;background:url(" + basePath + "packet/opensite/pc/style/images/vlogo.png) no-repeat center white;'></div>").appendTo("body");
+                },
+                onimportend: function (e) {
+                    $("#welcome").transition().all().done(function () {
+                        this.remove();
+                    }).scope().css("opacity", 0);
+                }
+            }).boot(_b);
+        </script>
+    </head>
+    <body>
+    </body>
+</html>
