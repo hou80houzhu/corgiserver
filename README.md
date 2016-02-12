@@ -42,6 +42,12 @@ goto the project folder to build the controllers.
 - WEBINF/web.json是项目的配置文件
 - WEBINF以外目录可放置其他静态资源
 
+##运行机制
+
+项目启动时会分别启动项目配置的服务，所有服务启动完毕后项目启动完毕。当项目启动完成后，请求到来都会经过过滤器链逐一处理，然后返回。
+
+>使用内置框架需要在项目的web.json文件中定义mvcservice和mvcfilter
+
 ## web.json
 
 - **page** 用于覆盖服务器默认的页面
@@ -96,7 +102,7 @@ web config由conf/web.json控制
 
 ##自定义服务器模块
 
-服务器模块需要放置于`lib/modules/`目录下
+服务器模块需要放置于`lib/modules/`目录下，并且确定好每一个Module的继承关系。
 
 ###自定义模块中的全局对象
 
@@ -120,4 +126,38 @@ project对象代表一个项目，其方法如下：
 - has(name) 判断是否包含packet定义
 - each(fn) 遍历所有的packet定义
 
+**CorgiServer**
 
+- getServerConfig() 获取serverConfig对象
+- getWebConfig() 获取全局webConfig对象
+- getCspContent(path) 获取csp文件内容
+- setTemplateMacro(key,fn) 设置全局模板的自定义标签
+
+**serverConfig**
+
+- getHost()
+- getPort()
+- getModules()
+- getBasePath()
+- getConfigPath()
+
+**webConfig**
+
+- getSessionConfig()
+- getSessionTimeout()
+- getPagePath()
+- getMimeType()
+- getBasePath()
+- getConfigPath()
+- isCspCache()
+
+**projectConfig**
+
+- getService()
+- getFilter()
+- hasFilter()
+- hasService()
+- getPathPath()
+- hasPage()
+- getServiceSize()
+- getFilterSize()
