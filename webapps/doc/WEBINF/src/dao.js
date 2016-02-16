@@ -13,7 +13,7 @@ Module({
         });
     },
     query: function (sql) {
-        var ps = brooder.promise();
+        var ps = packet.promise();
         this.getConnect(function (con) {
             con.query(sql, function (err, rows) {
                 if (err) {
