@@ -8,7 +8,7 @@ A web server running javascript like tomcat.
 
 corgiserver is a web server running javascript code, supports multiple projects, and ROOT as the default project. It is similar to Java Tomcat server, default resolution `.csp` file, which is a packet (specific wording javascript files) container.
 
-> Please refer to packet[brooderjs packet doc](http://rocui.com "brooderjs")
+> Please refer to packet [PacketJS doc](http://packetjs.org "PacketJS")
 
 ## How to use simply
 
