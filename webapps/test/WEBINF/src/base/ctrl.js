@@ -1,0 +1,34 @@
+/*
+ * @packet base.ctrl; 
+ */
+Module({
+    name:"test",
+    extend:"controller",
+    path:"/",
+    "/test":function(done){
+        done(this.getStringView("/test"));
+    },
+    "/aa/{cd}":function(done,map){
+        done(this.getStringView("/aa/{cd}"+JSON.stringify(map)));
+    },
+    "/bb/{cc}/{dd}":function(done,map){
+        console.log("============================>>>");
+        done(this.getStringView("/bb/{cc}/{dd}"+JSON.stringify(map)));
+    }
+});
+
+Module({
+    name:"test2",
+    extend:"controller",
+    path:"/m",
+    "/test":function(done){
+        done(this.getStringView("/test"));
+    },
+    "/aa/{cd}":function(done,map){
+        done(this.getStringView("/aa/{cd}"+JSON.stringify(map)));
+    },
+    "/bb/{cc}/{dd}":function(done,map){
+        console.log("============================>>>");
+        done(this.getStringView("/bb/{cc}/{dd}"+JSON.stringify(map)));
+    }
+});

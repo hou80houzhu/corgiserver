@@ -5,7 +5,7 @@ Module({
     name: "index",
     extend: "controller",
     path: "/",
-    index:function(done){
+    "/":function(done){
         done(this.getJsonView({
             aa: "aa"
         }));
@@ -15,7 +15,7 @@ Module({
     name: "test",
     extend: "controller",
     path: "/test",
-    test: function () {
+    "/test": function () {
         console.log("------controller---------");
     }
 });
@@ -23,7 +23,7 @@ Module({
     name: "test2",
     extend: "controller",
     path: "/test/good",
-    good: function (done) {
+    "/good": function (done) {
         done(this.getJsonView({
             aa: "aa"
         }));
@@ -33,7 +33,7 @@ Module({
     name: "image",
     extend: "controller",
     path: "/images",
-    icon: function (done) {
+    "/icon": function (done) {
         done(this.getFileView(this.context.getProjectPath() + "images/aa.png"));
     }
 });
@@ -41,10 +41,10 @@ Module({
     name: "template",
     extend: "controller",
     path: "/template",
-    test: function (done) {
+    "/test": function (done) {
         console.log(this.request.getParameters());
         this.response.setCookie("aa", "cccc");
-        done(this.getTemplateView("template.test.test", {name: "fucking..."}));
+        done(this.getTemplateView("template.test.test", {name: "rendered..."}));
     }
 });
 Module({
@@ -52,7 +52,7 @@ Module({
     extend: "controller",
     path: "/db",
     dao: "mysql",
-    test: function (done) {
+    "/test": function (done) {
         var user = this.getTable("user");
         this.dao.query(user).done(function (data) {
             done(this.getTemplateView("template.db.user", {users: data}));
@@ -60,7 +60,7 @@ Module({
             done(this.getTemplateView("template.test.test", {name: "fucking..."}));
         });
     },
-    test2: function (done) {
+    "/test2": function (done) {
         this.dao.transaction().then(function () {
             console.log("-->insert one");
             return this.query("INSERT INTO user SET username=?,password=?", ["a", "a"]);
@@ -77,7 +77,7 @@ Module({
     name: "session",
     extend: "controller",
     path: "/session",
-    add: function (done) {
+    "/add": function (done) {
         if (!this.request.getSession().hasAttribute("test")) {
             this.request.getSession().setAttribute("test", "fuck man");
             done(this.getStringView("not had"));
@@ -90,7 +90,7 @@ Module({
     name: "csp",
     extend: "controller",
     path: "/csp",
-    test: function (done) {
+    "/test": function (done) {
         done(this.getCspView("test.html", {aa: "aa"}));
     }
 });
@@ -98,7 +98,7 @@ Module({
     name:"request",
     extend:"controller",
     path:"/request",
-    test:function(done){
+    "/test":function(done){
         throw Error("fuck done");
         done(this.getRequestView("https://nodei.co/npm/request.png"));
     }
