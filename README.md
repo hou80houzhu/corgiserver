@@ -55,9 +55,9 @@ project
 
 - **WEBINF** Is the project of a protected directory can not be accessed outside
 - **WEBINF/src** is a packet drop directory (similar to java package management system)
-- **WEBINF/web.json**is the profile of the project
-- ** WEBINF ** directory can be placed outside other static resources
-- ** node_modules** the third part module folder installed by npm command.
+- **WEBINF/web.json** is the profile of the project
+- **WEBINF** directory can be placed outside other static resources
+- **node_modules** the third part module folder installed by npm command.
 
 > Third-party modules can co-exist with the project, the project can not references to each other between the third-party modules.Of course, you can use a global third-party modules.
 
