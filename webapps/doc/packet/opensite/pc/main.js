@@ -72,12 +72,13 @@ Module({
         this._running = false;
         this._currentpage = "";
         var qq = [
-            {pagename: "about", width: 400, type: "@.page"},
+            {pagename: "about", width: 400, type: "@.aboutpage"},
             {pagename: "start", width: 600, type: "@.page"},
             {pagename: "todo", width: 800, type: "@.todolistpage"},
             {pagename: "demo", width: 300, type: "@.page"},
             {pagename: "api", width: 300, type: "@.apipage"},
             {pagename: "tools", width: 400, type: "@.page"},
+            {pagename: "donate", width: 300, type: "@.page"},
             {pagename: "question", width: 700, type: "@.page"},
             {pagename: "end", width: $(window).width() - 700 - 260, type: "@.page"}
         ];
@@ -147,6 +148,7 @@ Module({
     },
     event_togglePage: function (e) {
         this.getChildAt(0).gotoPage(e.data);
+        e.stopPropagation();
     }
 });
 Module({
@@ -193,7 +195,7 @@ Module({
         $.loader().text(url, function (data) {
             var n = data.match(/<body>[\S\s]*?<\/body>/);
             if (n) {
-                data = "<div class='content-p-code'>"+n[0].substring(6, n[0].length - 7)+"</div>";
+                data = "<div class='content-p-code'>" + n[0].substring(6, n[0].length - 7) + "</div>";
             }
             ths.finders("content").html(data);
             ths.setScroll();
@@ -243,6 +245,24 @@ Module({
     },
     checkPath: function (path) {
         return this.option.path === path;
+    }
+});
+
+Module({
+    name: "aboutpage",
+    extend: "@.page",
+    init: function () {
+        this.superClass("init");
+        $.loader().js("https://buttons.github.io/buttons.js",null,null,{
+            id:"github-bjs"
+        });
+    },
+    find_donate:function(dom){
+        var ths=this;
+        dom.click(function(e){
+            ths.dispatchEvent("togglePage","donate");
+            e.stopPropagation();
+        });
     }
 });
 Module({

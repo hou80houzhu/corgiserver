@@ -1,13 +1,13 @@
 {
     "session": {
-        "timeout": 3000
+        "timeout": 3001
     },
-    "cspCache":false,
+    "cspCache": false,
     "page": {
-        "index":"index.csp",
+        "304": "304.csp",
         "404": "404.csp",
         "500": "500.csp",
-        "304": "304.csp"
+        "index": "index.csp"
     },
     "mime": {
         "123": "application/vnd.lotus-1-2-3",

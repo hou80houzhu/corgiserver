@@ -4,13 +4,13 @@
 
 A web server running javascript like tomcat.
 
-##What is corgiserver
+## What is corgiserver
 
-corgiserver is a web server running javascript code, supports multiple projects, and ROOT as the default project. It is similar to Java Tomcat server, default resolution `.csp` file, which is a packet (specific wording javascript files) container.
+corgiserver is a web server running javascript code, supports multiple projects, and ROOT as the default project. It is similar to Java Tomcat server, default resolution `.csp` file, which is a packet (specific wording javascript files) container.corgiserver is a nodejs module container.
 
-> Please refer to packet [PacketJS doc](http://packetjs.org "PacketJS")
+> Please refer to packet [AxesJS doc](http://axesjs.org "AxesJS")
 
-## How to use simply
+## Quick Start
 
 **step 1**: install corgiserver
 
@@ -18,7 +18,7 @@ corgiserver is a web server running javascript code, supports multiple projects,
 
 **step 2**:
 
-`corgiserver create projectname projectpath`
+`$ corgiserver create <projectname>,<projectpath>`
 
 the command will create the folder of project and its files.
 
@@ -26,24 +26,44 @@ the command will create the folder of project and its files.
 
 goto the project folder to build the controllers.
 
+**step 4**
 
-##Project directory structure
+run the server `$ corgiserver start`
+
+
+## Project directory structure
 
 ```
-    project
-       --WEBINF
-         --src
-           --code
-         --web.json
-       --index.html
+project
+   │
+   ├─────node_modules ($ npm install <module> --save)
+   │
+   ├──┬──WEBINF
+   │  │
+   │  ├──┬──src
+   │  │  │
+   │  │  └─────<code>
+   │  │
+   │  └─────web.json
+   │
+   ├─────<assets>
+   │
+   ├─────index.html
+   │
+   ├─────package.json
 ```
 
 - **WEBINF** Is the project of a protected directory can not be accessed outside
 - **WEBINF/src** is a packet drop directory (similar to java package management system)
 - **WEBINF/web.json**is the profile of the project
 - ** WEBINF ** directory can be placed outside other static resources
+- ** node_modules** the third part module folder installed by npm command.
 
-##Operating Mechanism
+> Third-party modules can co-exist with the project, the project can not references to each other between the third-party modules.Of course, you can use a global third-party modules.
+
+> rquire Third-party modules in the project code just like `require("@/<moduleName>");`,`"@/"` is important.
+
+## Operating Mechanism
 
 Would start separately configured service project when a project starts, all the services are started after the project start is completed. After the completion of the project started, the request will come one by one through the filter chain processing, and then return.
 
@@ -55,7 +75,7 @@ Would start separately configured service project when a project starts, all the
 - **Service** is used to configure the service to start with the project
 - **Filter** is used to configure a request through a filter
 
-###corgi provides predefined service
+### corgi provides predefined service
 
 - mvcservice for implementing initialization mvc functions     
   - database database configuration 
@@ -157,7 +177,7 @@ Configuration information object
 - `getServiceSize()`
 - `getFilterSize()`
 
-##See the demos in webapps
+## See the demos in webapps
 
 webapps/ROOT default project
 

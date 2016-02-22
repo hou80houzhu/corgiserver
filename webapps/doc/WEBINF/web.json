@@ -1,5 +1,7 @@
 {
-    "page":{},
+    "page":{
+        "index":"index.html"
+    },
     "service":[
         {"name":"mvcservice","option":{
             "database":{

@@ -1,6 +1,13 @@
+/*!
+ * AxesJS JavaScript Library v0.12.2
+ * http://axesjs.org/
+ * Author WangJinliang(hou80houzhu)
+ * licensed under the MIT licenses.
+ * https://github.com/hou80houzhu/axesjs/blob/master/LICENSE
+ */
 (function () {
     "use strict";
-    var brooder = function (start) {
+    var axes = function (start) {
         return new dom(start);
     };
     var browser = (function () {
@@ -406,8 +413,8 @@
             });
         }
     };
-    brooder.json = json, brooder.is = is, brooder.browser = browser, brooder.prefix = prefix, brooder.util = util;
-    brooder.serialize = serialize, brooder.extend = brooder.json.cover, brooder.nfn = function () {};
+    axes.json = json, axes.is = is, axes.browser = browser, axes.prefix = prefix, axes.util = util;
+    axes.serialize = serialize, axes.extend = axes.json.cover, axes.nfn = function () {};
 
     var queue = function () {
         this.list = [];
@@ -427,7 +434,7 @@
                 error: error || null
             });
         } else {
-            throw Error("[brooder]-this queue can not add task when it is not in state of init.");
+            throw Error("[axes]-this queue can not add task when it is not in state of init.");
         }
         return this;
     };
@@ -519,7 +526,7 @@
             this.current.error && this.current.error.call(this, result, e, this.current.parameter);
         }
     };
-    brooder.queue = function () {
+    axes.queue = function () {
         return new queue();
     };
 
@@ -648,7 +655,7 @@
         }
         return this;
     };
-    brooder.dynamicQueue = function () {
+    axes.dynamicQueue = function () {
         return new dynamicQueue();
     };
 
@@ -787,10 +794,10 @@
             });
         }
     };
-    brooder.promise = function (fn) {
+    axes.promise = function (fn) {
         return new promise(fn);
     };
-    brooder.all = function () {
+    axes.all = function () {
         var ps = $.promise();
         if (arguments.length > 0) {
             var a = Array.prototype.slice.call(arguments);
@@ -808,7 +815,7 @@
         }
         return ps;
     };
-    brooder.any = function () {
+    axes.any = function () {
         var ps = $.promise();
         if (arguments.length > 0) {
             var a = Array.prototype.slice.call(arguments);
@@ -911,10 +918,10 @@
             return ar;
         },
         queryChild: function (node, selector) {
-            var id = node.getAttribute("id") || "__brooder__";
+            var id = node.getAttribute("id") || "__axes__";
             node.setAttribute("id", id);
             var ar = dom.util.query(node, "#" + id + ">" + selector);
-            if (id === "__brooder__") {
+            if (id === "__axes__") {
                 node.removeAttribute("id");
             }
             return ar;
@@ -1054,7 +1061,7 @@
         var ops = {time: 200, type: "ease-out", delay: 0};
         var k = new promise();
         k.scope(this.dom);
-        brooder.extend(ops, option);
+        axes.extend(ops, option);
         var a = prefix.fix(properties.split(","));
         for (var i = 0; i < a.length; i++) {
             var property = a[i];
@@ -1072,7 +1079,7 @@
         var ops = {time: 200, type: "ease-out", delay: 0};
         var k = new promise();
         k.scope(this.dom);
-        brooder.extend(ops, option);
+        axes.extend(ops, option);
         this.mapping = {all: {property: "all", time: ops.time, type: ops.type, delay: ops.delay, promise: k}};
         transition.setCss.call(this);
         return k;
@@ -1940,7 +1947,7 @@
     };
     query.prototype.same = function (a) {
         var r = true;
-        a = brooder(a);
+        a = axes(a);
         if (this.length === a.length) {
             for (var i = 0; i < this.nodes.length; i++) {
                 if (a.nodes.indexOf(this.nodes[i]) === -1) {
@@ -2021,7 +2028,7 @@
                         c = this.nodes[0].datasets[a];
                     }
                 } else if (is.isObject(a)) {
-                    brooder.extend(this.nodes[0].datasets, a);
+                    axes.extend(this.nodes[0].datasets, a);
                 }
             } else if (arguments.length === 2) {
                 this.addClass("incache");
@@ -2256,7 +2263,7 @@
     };
     query.prototype.contains = function (a) {
         if (!this.isEmpty()) {
-            var b = brooder(a);
+            var b = axes(a);
             if (!b.isEmpty()) {
                 return this.nodes[0].contains(b.nodes[0]);
             }
@@ -2381,7 +2388,7 @@
         return this instanceof query;
     };
     query.prototype.add = function (a) {
-        var k = brooder(a);
+        var k = axes(a);
         this.nodes = this.nodes.concat(k.nodes);
         this.length = this.nodes.length;
         return this;
@@ -2432,7 +2439,7 @@
         return dom.util.getDom(r);
     };
     query.prototype.scrollingLeft = function (scrollLeft, time, type) {
-        var promise = brooder.promise().scope(this), ths = this;
+        var promise = axes.promise().scope(this), ths = this;
         if (this.scrollLeft() !== scrollLeft) {
             new tween({
                 from: this.scrollLeft(),
@@ -2452,7 +2459,7 @@
         return promise;
     };
     query.prototype.scrollingTop = function (scrollTop, time, type) {
-        var promise = brooder.promise().scope(this), ths = this;
+        var promise = axes.promise().scope(this), ths = this;
         if (this.scrollTop() !== scrollTop) {
             new tween({
                 from: this.scrollTop(),
@@ -2486,7 +2493,7 @@
             delay: 0,
             type: "ease-out"
         };
-        brooder.extend(ops, option);
+        axes.extend(ops, option);
         cssset = prefix.fix(cssset);
         var v = "";
         for (var i in cssset) {
@@ -2496,7 +2503,7 @@
             v = v.substring(0, v.length - 1);
         }
         if (!ani) {
-            var promise = brooder.promise().scope(dom);
+            var promise = axes.promise().scope(dom);
             var _endHandler = function (e) {
                 dom.get(0).removeEventListener(prefix.transitionEnd, _endHandler, false);
                 promise.resolve(e);
@@ -2507,7 +2514,7 @@
             ani = promise;
         } else {
             ani.then(function () {
-                var promise = brooder.promise().scope(dom);
+                var promise = axes.promise().scope(dom);
                 var _endHandler = function (e) {
                     dom.get(0).removeEventListener(prefix.transitionEnd, _endHandler, false);
                     promise.resolve(e);
@@ -2669,7 +2676,7 @@
         return a;
     };
     windoc.prototype.scrollingLeft = function (scrollLeft, time, type) {
-        var promise = brooder.promise().scope(this), ths = this;
+        var promise = axes.promise().scope(this), ths = this;
         if (this.scrollLeft() !== scrollLeft) {
             new tween({
                 from: this.scrollLeft(),
@@ -2689,7 +2696,7 @@
         return promise;
     };
     windoc.prototype.scrollingTop = function (scrollTop, time, type) {
-        var promise = brooder.promise().scope(this), ths = this;
+        var promise = axes.promise().scope(this), ths = this;
         if (this.scrollTop() !== scrollTop) {
             new tween({
                 from: this.scrollTop(),
@@ -3128,7 +3135,7 @@
             this[i] = null;
         }
     };
-    brooder.tween = function (option) {
+    axes.tween = function (option) {
         return new tween(option);
     };
 
@@ -3143,7 +3150,7 @@
         this.async = option.async === false ? false : true;
         this.timeout = option.timeout || 3000000;
         this.headers = option.headers || {};
-        this.events = brooder.extend({
+        this.events = axes.extend({
             readystatechange: null,
             loadstart: null,
             progress: null,
@@ -3246,24 +3253,24 @@
         this.xhr.send(this.data);
         return this;
     };
-    brooder.ajax = function (option) {
+    axes.ajax = function (option) {
         var pros = new promise();
         if (option) {
-            option.events = brooder.extend({
+            option.events = axes.extend({
                 error: function (e) {
                     option.error && option.error.call(this, e);
                     pros.reject(e);
                 },
                 load: function (e) {
                     var status = this.response.status;
-                    if ((status >= 200 && status < 300) || status === 304) {
+                    if ((status >= 200 && status < 300) || status === 304 || status === 0) {
                         var result = this.response.response;
                         if (this.realType === "json") {
                             var txt = this.response.responseText;
                             try {
                                 result = json.parse(txt);
                             } catch (e) {
-                                throw Error("[brooder] ajax unvaliable json string,url is '" + option.url + "'");
+                                throw Error("[axes] ajax unvaliable json string,url is '" + option.url + "'");
                             }
                         }
                         option.success && option.success.call(this, result);
@@ -3280,7 +3287,7 @@
             return pros.resolve();
         }
     };
-    brooder.request = function (option) {
+    axes.request = function (option) {
         return new request(option);
     };
 
@@ -3345,7 +3352,7 @@
                     };
                     tpt();
                 } else {
-                    brooder.ajax({
+                    axes.ajax({
                         url: csspath,
                         dataType: "text",
                         type: "get",
@@ -3373,7 +3380,7 @@
             }
             return this;
         },
-        js: function (jspath, callback, error, charset, async) {
+        js: function (jspath, callback, error, props, async) {
             if (async === undefined || async === null) {
                 async = true;
             }
@@ -3394,20 +3401,21 @@
                     var _a = document.createElement("script");
                     _a.src = jspath;
                     _a.type = "text/javascript";
-                    if (charset && charset !== "")
-                        _a.charset = charset;
+                    for (var i in props) {
+                        _a[i] = props[i];
+                    }
                     _a.addEventListener("load", _ol, false);
                     _a.addEventListener("error", _oe, false);
                     document.getElementsByTagName("head")[0].appendChild(_a);
                     loader.importsmapping.addJs(jspath);
                 } else {
-                    brooder.ajax({
+                    axes.ajax({
                         url: jspath,
                         dataType: "text",
                         type: "get",
                         async: false,
                         success: function (e) {
-                            (new Function("try{" + e + "}catch(e){console.error('[brooder]imports: %s ,path " + jspath + "',e.message);}"))();
+                            (new Function("try{" + e + "}catch(e){console.error('[axes]imports: %s ,path " + jspath + "',e.message);}"))();
                             if (callback) {
                                 callback();
                             }
@@ -3446,21 +3454,23 @@
             return this;
         },
         text: function (url, success, error, data) {
-            brooder.ajax({
+            axes.ajax({
                 url: url,
                 data: data,
                 dataType: "text",
                 success: success,
+                type: "get",
                 error: error
             });
             return this;
         },
         json: function (url, success, error, data) {
-            brooder.ajax({
+            axes.ajax({
                 url: url,
                 data: data,
                 dataType: "json",
                 success: success,
+                type: "get",
                 error: error
             });
             return this;
@@ -3499,7 +3509,7 @@
             }
         }
     };
-    brooder.loader = function () {
+    axes.loader = function () {
         return loader;
     };
 
@@ -3529,7 +3539,7 @@
         }
     };
     var bootstrap = function (obj) {
-        brooder.extend(baseMapping, {
+        axes.extend(baseMapping, {
             id: obj.id ? obj.id.toUpperCase() : "",
             preload: obj.preload,
             basePath: (obj.basePath[obj.basePath.length - 1] === "/" ? obj.basePath : obj.basePath + "/"),
@@ -3583,7 +3593,7 @@
     };
     bootstrap.prototype.boot = function (selector, optionName) {
         if (baseMapping.persistence) {
-            var idcode = "BROODERBUILD[" + baseMapping.id + "]";
+            var idcode = "PACKETBUILD[" + baseMapping.id + "]";
             try {
                 var a = window.localStorage.getItem(idcode);
                 var b = a.match(/[0-9]+/), c = 0;
@@ -3594,18 +3604,15 @@
             } catch (e) {
                 baseMapping.currentBuild = 0;
             }
-            try {
-                window.localStorage.setItem(idcode, baseMapping.sourceMapping.build);
-            } catch (e) {
-            }
+            var cid = parseInt(baseMapping.sourceMapping.build.substring(baseMapping.id.length));
             baseMapping.update = parseInt(baseMapping.update);
-            if (baseMapping.update === 0 || baseMapping.currentBuild < baseMapping.update) {
+            if (baseMapping.update === 0 || baseMapping.currentBuild <= baseMapping.update || baseMapping.currentBuild > cid) {
                 if (baseMapping.currentBuild !== 0) {
                     baseMapping.cacheReset = true;
                     try {
                         baseMapping.appupdate && baseMapping.appupdate({old: baseMapping.currentBuild, current: baseMapping.sourceMapping.build, update: baseMapping.update});
                     } catch (e) {
-                        console.error("[brooder] onappupdate called error " + e.message);
+                        console.error("[axes] onappupdate called error " + e.message);
                     }
                 }
             }
@@ -3613,13 +3620,6 @@
             baseMapping.update = -1;
             baseMapping.currentBuild = 0;
             baseMapping.cacheReset = true;
-        }
-        if (baseMapping.debug) {
-            brooder.debug = {
-                modules: module.factory,
-                options: option.options,
-                packet: packet.requiremapping
-            };
         }
         packet.jspersistence = new filepersistence("js");
         packet.csspersistence = new filepersistence("css");
@@ -3630,8 +3630,28 @@
         packet.templatepersistence = new filepersistence("template");
         packet.codepersistence = new filepersistence("code");
         packet.otherpersistence = new filepersistence("other");
+        try {
+            window.localStorage.setItem(idcode, baseMapping.sourceMapping.build);
+        } catch (e) {
+        }
+        if (baseMapping.debug) {
+            axes.debug = {
+                modules: module.factory,
+                options: option.options,
+                json: packet.jsonpersistence._data,
+                resource: {
+                    js: packet.jspersistence,
+                    css: packet.cssmapping,
+                    text: packet.textpersistence,
+                    html: packet.htmlpersistence,
+                    image: packet.imagepersistence
+                },
+                require: packet.requiremapping,
+                doms: packet.templatepersistence._data
+            };
+        }
         var dom = null, arg = arguments.length;
-        brooder().ready(function () {
+        axes().ready(function () {
             if (arg === 1) {
                 dom = $("body");
                 optionName = selector;
@@ -3646,20 +3666,20 @@
                     } else {
                         dom.dataset("view", "root").dataset("viewId", "root").dataset("option", "");
                     }
-                    baseMapping.debug && console.log("[brooder] version:0.10.4,debug:" + baseMapping.debug + ",basePath:" + baseMapping.basePath);
-                    var root = brooder("*[data-view='root']");
+                    baseMapping.debug && console.log("[axes] version:0.10.4,debug:" + baseMapping.debug + ",basePath:" + baseMapping.basePath);
+                    var root = axes("*[data-view='root']");
                     if (root.length > 0) {
                         module.getViewInstance(root, optionName, function (a) {
                             a.privator("render");
                         });
                     } else {
-                        throw Error("[brooder boot] can not find the root element.");
+                        throw Error("[axes boot] can not find the root element.");
                     }
                 });
             });
         });
     };
-    brooder.App = function (obj) {
+    axes.App = function (obj) {
         return new bootstrap(obj);
     };
 
@@ -3733,7 +3753,7 @@
 
     var filepersistence = function (type) {
         this.type = type;
-        this.cacheId = "BROODERCACHE[" + baseMapping.id + ":" + this.type.toUpperCase() + "]";
+        this.cacheId = "PACKETCACHE[" + baseMapping.id + ":" + this.type.toUpperCase() + "]";
         this._data = {};
         this.currentTempHash = baseMapping.sourceMapping ? (baseMapping.sourceMapping[this.type] || {}) : {};
         this.init();
@@ -3878,7 +3898,7 @@
             onimportend: baseMapping.onimportend,
             onimportprogress: baseMapping.onimportprogress
         }, ths = this;
-        brooder.extend(ops, option);
+        axes.extend(ops, option);
         if (ops.packetName !== "") {
             var hassuffix = ops.packetName.match(packet.issuffix), suffix = null;
             if (hassuffix) {
@@ -3920,25 +3940,25 @@
                             try {
                                 d["basePath"] = ops.basepath;
                                 d["folder"] = d.path.substring(0, d.path.lastIndexOf("/")) + "/";
-                                brooder.___info = d;
+                                axes.___info = d;
                                 new Function("$", "Module", "Option", "module", "exports", "require", "Plugin", "Method", xcode).call(
-                                        d, brooder, brooder.Module, brooder.Option, d, {},
+                                        d, axes, axes.Module, axes.Option, d, {},
                                         function (packetName) {
                                             var ap = packet.requiremapping[packetName];
                                             if (ap) {
                                                 return ap.exports;
                                             } else {
-                                                throw Error("[brooder] method require() called error,packet of " + packetName + " is not required in packet of " + d.packet);
+                                                throw Error("[axes] method require() called error,packet of " + packetName + " is not required in packet of " + d.packet);
                                             }
                                         }, function (obj) {
-                                    brooder.Plugin(obj);
+                                    axes.Plugin(obj);
                                 }, function (obj) {
-                                    brooder.Method(obj);
+                                    axes.Method(obj);
                                 });
-                                brooder.___info = null;
+                                axes.___info = null;
                             } catch (e) {
-                                brooder.___info = null;
-                                console.error("[brooder] packet import error name of " + d.packet + " path of " + d.path + " Message:" + e.stack);
+                                axes.___info = null;
+                                console.error("[axes] packet import error name of " + d.packet + " path of " + d.path + " Message:" + e.stack);
                             }
                         }
                         packet.packetmapping.push(path);
@@ -3948,7 +3968,7 @@
                             path: ths.option.path
                         });
                     } else {
-                        throw Error("[brooder] packet _depends error,maybe has circle _depends,or some file has no packet info.");
+                        throw Error("[axes] packet _depends error,maybe has circle _depends,or some file has no packet info.");
                     }
                     ths.clean();
                 }, ops.target);
@@ -3997,7 +4017,7 @@
         return str;
     };
     packet.pretreat = function () {
-        var ps = brooder.promise();
+        var ps = axes.promise();
         if (baseMapping.pretreat) {
             baseMapping.pretreat.call(new pretreat(ps));
         } else {
@@ -4082,9 +4102,9 @@
                         if (key !== "image") {
                             mt = mt.replace(packet.issuffix, "");
                         }
-                        n._packets_[mt] = t[0];
                         t.splice(t.length - 1, 1);
                         value = t.join(":");
+                        n._packets_[mt] = value;
                     } else {
                         var m = t[0].split("\.");
                         var mt = m[m.length - 1];
@@ -4167,6 +4187,7 @@
                             }
                             break;
                         case "js":
+                            var q = value;
                             value = {
                                 packet: value.replace(packet.issuffix, ""),
                                 path: "",
@@ -4178,6 +4199,8 @@
                                 } else {
                                     value.path = basePath + value.packet;
                                 }
+                            } else {
+                                value.path = q;
                             }
                             break;
                         default:
@@ -4200,7 +4223,7 @@
             if (info._packets_[index]) {
                 return str[0] + info._packets_[index] + "." + key + str[str.length - 1];
             } else {
-                throw Error("[brooder] packet can not find with tag of " + str + ",packet is " + info.packet);
+                throw Error("[axes] packet can not find with tag of " + str + ",packet is " + info.packet);
             }
         }).replace(packet.isCurrentTag, function (str) {
             return str[0] + info.packet + "." + str.split("\.")[1];
@@ -4209,7 +4232,7 @@
             if (info._packets_[index]) {
                 return str[0] + info._packets_[index] + str[str.length - 1];
             } else {
-                throw Error("[brooder] packet can not find with tag of " + str + ",packet is " + info.packet);
+                throw Error("[axes] packet can not find with tag of " + str + ",packet is " + info.packet);
             }
         }).replace(packet.isOther, function (str) {
             return str.substring(1);
@@ -4275,7 +4298,7 @@
         }
     };
     packet.preload = function (fn) {
-        var queue = brooder.queue();
+        var queue = axes.queue();
         queue.complete(function () {
             fn && fn();
         });
@@ -4332,7 +4355,7 @@
                     packet: data[i].packet
                 }) : path;
                 queue.add(function (a, b) {
-                    brooder.ajax({
+                    axes.ajax({
                         url: b.path,
                         type: "get",
                         dataType: type,
@@ -4356,7 +4379,7 @@
         var aa = packet.getPacketInfo.call(ths, e);
         aa["parent"] = parent;
         if (aa.packet === "nopacket") {
-            console.error("[brooder] file has no packet info,path of " + pathname);
+            console.error("[axes] file has no packet info,path of " + pathname);
         }
         try {
             e = packet.replacePacketNames.call(ths, aa, e);
@@ -4367,7 +4390,7 @@
             info: aa,
             code: e
         });
-        var queue = brooder.queue();
+        var queue = axes.queue();
         queue.progress(function (e) {
             e["packet"] = aa.packet;
             ths.option.onimportprogress && ths.option.onimportprogress(e);
@@ -4400,8 +4423,8 @@
             }
         }
         for (var i = 0; i < aa.css.length; i++) {
-            if (packet.cssmapping.indexOf(aa.css[i].packet) === -1) {
-                packet.cssmapping.push(aa.css[i].packet);
+            if (packet.cssmapping.indexOf(aa.css[i].path) === -1) {
+                packet.cssmapping.push(aa.css[i].path);
                 var path = aa.css[i].path, d = packet.csspersistence.check(aa.css[i].packet);
                 if (!d) {
                     aa.css[i].path = baseMapping.urlfilter ? baseMapping.urlfilter({
@@ -4411,7 +4434,7 @@
                     }) : path;
                     queue.add(function (a, info) {
                         if (baseMapping.persistence) {
-                            brooder.ajax({
+                            axes.ajax({
                                 url: info.path,
                                 dataType: "text",
                                 type: "get",
@@ -4456,7 +4479,7 @@
                     packet: aa.template[i].packet
                 }) : path;
                 queue.add(function (a, info) {
-                    brooder.ajax({
+                    axes.ajax({
                         url: info.path,
                         type: "get",
                         dataType: "text",
@@ -4598,20 +4621,24 @@
             }
         }
         return code.replace(/src=['"].+?['"]/g, function (a) {
-            var rp = a, newpath = a.substring(5, a.length - 1), _a = newpath.split("/"), name = _a[_a.length - 1].split(".")[0], done = false;
-            if (oldtemp.indexOf(name) !== -1) {
-                for (var i = 0; i < oldpaths.length; i++) {
-                    if (oldpaths[i].indexOf(name) !== -1) {
-                        rp = oldpaths[i];
-                        done = true;
-                        break;
+            if (a.indexOf("<%") === -1) {
+                var rp = a, newpath = a.substring(5, a.length - 1), _a = newpath.split("/"), name = _a[_a.length - 1].split(".")[0], done = false;
+                if (oldtemp.indexOf(name) !== -1) {
+                    for (var i = 0; i < oldpaths.length; i++) {
+                        if (oldpaths[i].indexOf(name) !== -1) {
+                            rp = oldpaths[i];
+                            done = true;
+                            break;
+                        }
                     }
                 }
+                if (!done) {
+                    rp = "src=\"" + baseMapping.basePath + a.substring(5, a.length - 1) + "\"";
+                }
+                return rp;
+            } else {
+                return a;
             }
-            if (!done) {
-                rp = "src=\"" + baseMapping.basePath + a.substring(5, a.length - 1) + "\"";
-            }
-            return rp;
         });
     };
     packet.prototype.load = function (pkt, path, fn, parent) {
@@ -4624,7 +4651,7 @@
                 path: path,
                 packet: pkt
             }) : path;
-            brooder.ajax({
+            axes.ajax({
                 url: path,
                 dataType: "text",
                 type: "get",
@@ -4643,10 +4670,10 @@
             this[i] = null;
         }
     };
-    brooder.packet = function (option) {
+    axes.packet = function (option) {
         new packet(option);
     };
-    brooder.source = function (a) {
+    axes.source = function (a) {
         for (var type in a) {
             var fileload = true;
             if (packet[type + "persistence"].isLoaded()) {
@@ -4657,7 +4684,7 @@
             }
         }
     };
-    brooder._packet = packet;
+    axes._packet = packet;
 
     var template = function (temp, macro) {
         temp = template.cache(temp);
@@ -4668,7 +4695,7 @@
         this._session = null;
         this._caching = {};
         this._macrofn = macro || {};
-        brooder.extend(this._macrofn, template.globalMacro);
+        axes.extend(this._macrofn, template.globalMacro);
     };
     template.a = /&lt;%/g;
     template.b = /%&gt;/g;
@@ -4966,7 +4993,7 @@
     };
     template.prototype.macro = function (name, fn) {
         if (arguments.length === 1) {
-            brooder.extend(this._macrofn,name);
+            this._macrofn = name || {};
         } else if (arguments.length === 2) {
             this._macrofn[name] = fn;
         }
@@ -4977,13 +5004,13 @@
             this[i] = null;
         }
     };
-    brooder.template = function () {
+    axes.template = function () {
         var temp = Array.prototype.slice.call(arguments).join("");
         return new template(temp);
     };
-    brooder.setTemplateGlobalMacro = function (key, fn) {
+    axes.setTemplateGlobalMacro = function (key, fn) {
         if (arguments.length === 1) {
-            brooder.extend(template.globalMacro, key);
+            axes.extend(template.globalMacro, key);
         } else if (arguments.length === 2) {
             template.globalMacro[key] = fn;
         }
@@ -5018,7 +5045,7 @@
                 }
                 for (var i in self.prototype) {
                     if (is.isFunction(self.prototype[i])) {
-                        if (i !== propName) {
+                        if (!parent.prototype[i]) {
                             pp.push(i);
                             (function (mp) {
                                 _a[mp] = function () {
@@ -5168,21 +5195,21 @@
         var array = obj.extend;
         is.isString(obj.extend) && (array = [obj.extend]);
         a._parent = array[0];
-        var c = brooder.extend({}, brooder.json.clone(this.mapping[array[0]].prototype.__adapt__._option));
-        a._option = brooder.extend(c, a._option);
+        var c = axes.extend({}, axes.json.clone(this.mapping[array[0]].prototype.__adapt__._option));
+        a._option = axes.extend(c, a._option);
         for (var i = array.length - 1; i >= 0; i--) {
             if (array[i] !== "adapt") {
                 var d = this.mapping[array[i]].prototype;
                 var __mapping = {}, __private = {}, __static = {};
-                brooder.extend(__mapping, brooder.json.clone(d.__adapt__._mapping));
-                brooder.extend(__private, d.__adapt__._private);
-                brooder.extend(__static, d.__adapt__._static);
-                brooder.extend(a._mapping, __mapping);
-                brooder.extend(a._private, __private);
-                brooder.extend(a._static, __static);
+                axes.extend(__mapping, axes.json.clone(d.__adapt__._mapping));
+                axes.extend(__private, d.__adapt__._private);
+                axes.extend(__static, d.__adapt__._static);
+                axes.extend(a._mapping, __mapping);
+                axes.extend(a._private, __private);
+                axes.extend(a._static, __static);
                 var q = Object.keys(d);
                 for (var t = 0; t < q.length; t++) {
-                    if (brooder.is.isFunction(d[t])) {
+                    if (axes.is.isFunction(d[t])) {
                         if (!factory.a.test(t)) {
                             prpt[q[t]] = d[q[t]];
                         }
@@ -5236,8 +5263,8 @@
         var clazz = this.mapping[name];
         if (clazz) {
             objx = new clazz();
-            var _opp = brooder.extend({}, brooder.json.clone(clazz.prototype.__adapt__._option));
-            objx.option = brooder.extend(_opp, option);
+            var _opp = axes.extend({}, axes.json.clone(clazz.prototype.__adapt__._option));
+            objx.option = axes.extend(_opp, option);
             for (var i = clazz.prototype.__adapt__._extendslink.length - 1; i >= 0; i--) {
                 var p = this.mapping[clazz.prototype.__adapt__._extendslink[i]];
                 if (p && p.prototype["init"]) {
@@ -5255,16 +5282,16 @@
             if (sg) {
                 if (!fsingleton[type]) {
                     var objxx = new clazz();
-                    var _opp = brooder.extend({}, brooder.json.clone(clazz.prototype.__adapt__._option));
-                    brooder.extend(_opp, option);
+                    var _opp = axes.extend({}, axes.json.clone(clazz.prototype.__adapt__._option));
+                    axes.extend(_opp, option);
                     objxx.option = _opp;
                     fsingleton[type] = objxx;
                 }
                 objx = fsingleton[type];
             } else {
                 objx = new clazz();
-                var _opp = brooder.extend({}, brooder.json.clone(clazz.prototype.__adapt__._option));
-                brooder.extend(_opp, option);
+                var _opp = axes.extend({}, axes.json.clone(clazz.prototype.__adapt__._option));
+                axes.extend(_opp, option);
                 objx.option = _opp;
             }
         }
@@ -5352,7 +5379,7 @@
     factory.prototype.has = function (clazzType) {
         return this.mapping[clazzType] !== undefined;
     };
-    brooder.adapt = function () {
+    axes.adapt = function () {
         return new factory();
     };
 
@@ -5624,7 +5651,7 @@
             return obj;
         }
     };
-    brooder.observe = function (name, obj, fn) {
+    axes.observe = function (name, obj, fn) {
         return observe(name, obj, fn);
     };
 
@@ -5671,8 +5698,8 @@
                 }
             }
         },
-        factory: brooder.adapt(),
-        getPacketName: function (name, suffix) {
+        factory: axes.adapt(),
+        getaxesName: function (name, suffix) {
             if (name) {
                 name = name.trim();
                 if (name !== "") {
@@ -5712,7 +5739,7 @@
                     }
                 });
             } else {
-                throw Error("[brooder] view can not init.the element has no attribute like view-*");
+                throw Error("[axes] view can not init.the element has no attribute like view-*");
             }
         },
         add: function (obj) {
@@ -5742,8 +5769,8 @@
         get: function (target, moduleName, option, fn) {
             if (moduleName !== undefined && moduleName !== null && moduleName !== "") {
                 if (!module.has(moduleName)) {
-                    var packetName = module.getPacketName(moduleName);
-                    brooder.packet({
+                    var packetName = module.getaxesName(moduleName);
+                    axes.packet({
                         packetName: packetName,
                         target: target,
                         back: function () {
@@ -5751,7 +5778,7 @@
                                 if (module.has(moduleName)) {
                                     fn(module.factory.instance(moduleName, option));
                                 } else {
-                                    throw Error("[brooder] can not find module with name of " + moduleName + ",it is not in the packet of " + module.getPacketName(moduleName) + " or the packet file inited failed.");
+                                    throw Error("[axes] can not find module with name of " + moduleName + ",it is not in the packet of " + module.getaxesName(moduleName) + " or the packet file inited failed.");
                                 }
                             }
                         }
@@ -5762,7 +5789,7 @@
                     }
                 }
             } else {
-                throw Error("[brooder] packet name can not undefined or null or ''.");
+                throw Error("[axes] packet name can not undefined or null or ''.");
             }
         },
         task: new dynamicQueue()
@@ -5773,7 +5800,7 @@
             if (obj.name && obj.name !== "") {
                 option.options[obj.name] = obj.option;
             } else {
-                throw Error("[brooder] option name can not null or ''");
+                throw Error("[axes] option name can not null or ''");
             }
         },
         has: function (optionName) {
@@ -5789,8 +5816,8 @@
                 if (optionName[0] !== "{" && optionName[0] !== "[") {
                     var a = option.has(optionName);
                     if (a === false) {
-                        var packetName = module.getPacketName(optionName);
-                        brooder.packet({
+                        var packetName = module.getaxesName(optionName);
+                        axes.packet({
                             packetName: packetName,
                             target: target,
                             back: function () {
@@ -5799,7 +5826,7 @@
                                     if (ops) {
                                         fn(ops);
                                     } else {
-                                        throw Error("[brooder] can not find option with name of " + optionName + ",is not in the packet of " + module.getPacketName(optionName));
+                                        throw Error("[axes] can not find option with name of " + optionName + ",is not in the packet of " + module.getaxesName(optionName));
                                     }
                                 }
                             }
@@ -5828,7 +5855,7 @@
         this.currentTarget = null;
     };
     viewevent.prototype.clone = function () {
-        return brooder.extend(new viewevnet(), this);
+        return axes.extend(new viewevnet(), this);
     };
     viewevent.prototype.stopPropagation = function () {
         this._goon = false;
@@ -5883,7 +5910,7 @@
             try {
                 module["find_" + _name] && module["find_" + _name]($(this), module._finders);
             } catch (e) {
-                console.error("[brooder] view finder called error with module of " + module.type() + " Message:" + e.message);
+                console.error("[axes] view finder called error with module of " + module.type() + " Message:" + e.message);
             }
         });
     };
@@ -5908,7 +5935,7 @@
                 try {
                     module["group_" + name]($(this));
                 } catch (e) {
-                    console.error("[brooder] view groups called error with module of " + module.type() + " Message:" + e.message);
+                    console.error("[axes] view groups called error with module of " + module.type() + " Message:" + e.message);
                 }
             }
         });
@@ -5945,19 +5972,19 @@
                 ops.url = url;
             } else if (is.isObject(url)) {
                 _ok = true;
-                brooder.extend(ops, url);
+                axes.extend(ops, url);
             }
             if (_ok) {
                 ops.data = data;
                 this.doRequest(ops, _rs);
                 return _rs;
             } else {
-                throw Error("[brooder] request parameter error");
+                throw Error("[axes] request parameter error");
             }
         },
         doRequest: function (option, reqeustState) {
             var ths = this;
-            brooder.ajax(option).done(function (a) {
+            axes.ajax(option).done(function (a) {
                 if (a.code && a.code === "1") {
                     reqeustState._data && reqeustState._data.call(ths, a.data);
                 } else {
@@ -5997,7 +6024,7 @@
         template: "",
         onbeforeinit: null,
         onendinit: null,
-        onunload: brooder.nfn,
+        onunload: axes.nfn,
         onnoderemoved: null,
         onnodeinserted: null,
         onchildremove: null,
@@ -6045,7 +6072,7 @@
                         try {
                             ths.onbeforeinit(ths.option);
                         } catch (e) {
-                            console.error("[brooder] onbeforeinit called error with module of " + ths.type() + " Message:" + e.message);
+                            console.error("[axes] onbeforeinit called error with module of " + ths.type() + " Message:" + e.message);
                         }
                     }
                     if (ths.className && ths.className !== "") {
@@ -6055,14 +6082,14 @@
                         try {
                             ths.init(ths.option);
                         } catch (e) {
-                            console.error("[brooder] init called error with module of " + ths.type() + " Message:" + e.stack);
+                            console.error("[axes] init called error with module of " + ths.type() + " Message:" + e.stack);
                         }
                     }
                     if (typeof ths.onendinit === 'function') {
                         try {
                             ths.onendinit(ths.option);
                         } catch (e) {
-                            console.error("[brooder] onendinit called error with module of " + ths.type() + " Message:" + e.message);
+                            console.error("[axes] onendinit called error with module of " + ths.type() + " Message:" + e.message);
                         }
                     }
                     fn && fn();
@@ -6085,7 +6112,7 @@
         postData: function (ops) {
             ops["dataType"] = "json";
             var ths = this;
-            brooder.ajax(ops).done(function (a) {
+            axes.ajax(ops).done(function (a) {
                 if (a.code && a.code === "1") {
                     ops.back && ops.back.call(ths, a.data);
                 } else {
@@ -6176,18 +6203,18 @@
             try {
                 ths.onbeforerender && ths.onbeforerender();
             } catch (e) {
-                console.error("[brooder] onbeforerender called error with module of " + ths.type() + " Message:" + e.message);
+                console.error("[axes] onbeforerender called error with module of " + ths.type() + " Message:" + e.message);
             }
             try {
-                brooder.template(ths.template).renderTo(ths.dom, data);
+                axes.template(ths.template).renderTo(ths.dom, data);
                 ths.delegate();
             } catch (e) {
-                console.error("[brooder] render called error with module of " + ths.type() + " Message:" + e.message);
+                console.error("[axes] render called error with module of " + ths.type() + " Message:" + e.message);
             }
             try {
                 ths.onendrender && ths.onendrender();
             } catch (e) {
-                console.error("[brooder] onendrender called error with module of " + ths.type() + " Message:" + e.message);
+                console.error("[axes] onendrender called error with module of " + ths.type() + " Message:" + e.message);
             }
             setTimeout(function () {
                 ps.resolve();
@@ -6196,7 +6223,7 @@
         },
         original: function (methods) {
             var a = Object.getPrototypeOf(this)[methods];
-            if (brooder.is.isFunction(a)) {
+            if (axes.is.isFunction(a)) {
                 var b = Array.prototype.slice.call(arguments);
                 b.splice(0, 1);
                 return a.apply(this, b);
@@ -6208,7 +6235,7 @@
             var t = this.parentView, r = null;
             while (t) {
                 var a = t[methodName];
-                if (a && brooder.is.isFunction(a)) {
+                if (a && axes.is.isFunction(a)) {
                     var b = Array.prototype.slice.call(arguments);
                     b.splice(0, 1);
                     r = a.apply(t, b);
@@ -6232,7 +6259,7 @@
             return b;
         },
         parentViews: function (level) {
-            level = brooder.is.isAvalid(level) ? (brooder.is.isNumber(level) ? level : parseInt(level)) : 0;
+            level = axes.is.isAvalid(level) ? (axes.is.isNumber(level) ? level : parseInt(level)) : 0;
             var b = this.parentView, c = level - 1;
             while (b && c > 0) {
                 c--;
@@ -6295,11 +6322,11 @@
             return this;
         },
         getUUID: function () {
-            return brooder.util.uuid();
+            return axes.util.uuid();
         },
         observe: function (name, obj) {
             var ths = this;
-            return brooder.observe(name, obj, function (e) {
+            return axes.observe(name, obj, function (e) {
                 var p = name + "_" + e.object.getPath().name + (e.property ? "." + e.property : "") + "_" + e.type;
                 if (ths[p]) {
                     ths[p](e);
@@ -6307,28 +6334,28 @@
             });
         },
         getStaticJson: function (packet) {
-            var ps = brooder.promise().scope(this);
+            var ps = axes.promise().scope(this);
             filepersistence.getStaitcFile("json", packet, function (data) {
                 ps.resolve(data);
             });
             return ps;
         },
         getStaticHtml: function (packet) {
-            var ps = brooder.promise().scope(this);
+            var ps = axes.promise().scope(this);
             filepersistence.getStaitcFile("html", packet, function (data) {
                 ps.resolve(data);
             });
             return ps;
         },
         getStaticText: function (packet) {
-            var ps = brooder.promise().scope(this);
+            var ps = axes.promise().scope(this);
             filepersistence.getStaitcFile("text", packet, function (data) {
                 ps.resolve(data);
             });
             return ps;
         },
         getStaticImage: function (packet) {
-            var ps = brooder.promise().scope(this);
+            var ps = axes.promise().scope(this);
             filepersistence.getStaitcFile("image", packet, function (data) {
                 ps.resolve(data);
             });
@@ -6341,7 +6368,7 @@
             try {
                 this.onunload();
             } catch (e) {
-                console.error("[brooder] onunload called error with module of " + this.type() + " Message:" + e.stack);
+                console.error("[axes] onunload called error with module of " + this.type() + " Message:" + e.stack);
             }
             this._finders.length = 0;
             this._groups.length = 0;
@@ -6353,7 +6380,7 @@
                     try {
                         parentview.onchildremove && parentview.onchildremove(this);
                     } catch (e) {
-                        console.error("[brooder] onchildremove called error with module of " + parentview.type() + " Message:" + e.stack);
+                        console.error("[axes] onchildremove called error with module of " + parentview.type() + " Message:" + e.stack);
                     }
                 }
             }
@@ -6404,7 +6431,7 @@
                 this._groups = new delegater();
                 this._handlers = {};
                 this.children = [];
-                var ths = this, optionName = this.dom.dataset("option"), queue = brooder.queue();
+                var ths = this, optionName = this.dom.dataset("option"), queue = axes.queue();
                 if (this.dom.hasClass("_futuretochange_")) {
                     this.dom.removeClass("_futuretochange_");
                     var prps = this.__adapt__._factory.mapping[this.__adapt__._type].prototype;
@@ -6444,17 +6471,17 @@
                             try {
                                 ths.onbeforeinit(ths.option);
                             } catch (e) {
-                                console.error("[brooder] onbeforeinit called error with module of " + ths.type() + " Message:" + e.stack);
+                                console.error("[axes] onbeforeinit called error with module of " + ths.type() + " Message:" + e.stack);
                             }
                         }
                         var str = ths.layout;
                         if (str === "" && ths.dom.children().length > 0) {
                             str = ths.dom.html();
                         }
-                        if (brooder.is.isString(str)) {
+                        if (axes.is.isString(str)) {
                             try {
-                                var temp = brooder.template(str);
-                                temp.macro(brooder.extend({
+                                var temp = axes.template(str);
+                                temp.macro(axes.extend({
                                     module: function (attrs, render) {
                                         var type = attrs["type"], option = attrs["option"], id = attrs["id"];
                                         var prps = {tagName: "div", fullClassName: "_futuretochange_"};
@@ -6476,7 +6503,7 @@
                                 ths.dom.html(str);
                                 temp.flush(ths.dom);
                             } catch (e) {
-                                console.error("[brooder] parse layout called error with module of " + ths.type() + " Message:" + e.stack);
+                                console.error("[axes] parse layout called error with module of " + ths.type() + " Message:" + e.stack);
                                 ths.dom.html("");
                             }
                         }
@@ -6484,14 +6511,14 @@
                             try {
                                 ths.ondomready(ths.option);
                             } catch (e) {
-                                console.error("[brooder] ondomready called error with module of " + ths.type() + " Message:" + e.stack);
+                                console.error("[axes] ondomready called error with module of " + ths.type() + " Message:" + e.stack);
                             }
                         }
                         if (typeof ths.onnodeinserted === 'function') {
                             try {
                                 ths.onnodeinserted(ths.dom);
                             } catch (e) {
-                                console.error("[brooder] onnodeinserted called error with module of " + ths.type() + " Message:" + e.stack);
+                                console.error("[axes] onnodeinserted called error with module of " + ths.type() + " Message:" + e.stack);
                             }
                         }
                         queue.complete(function (a) {
@@ -6505,14 +6532,14 @@
                                 try {
                                     a.init(a.option);
                                 } catch (e) {
-                                    console.error("[brooder] init called error with module of " + ths.type() + " Message:" + e.stack);
+                                    console.error("[axes] init called error with module of " + ths.type() + " Message:" + e.stack);
                                 }
                             }
                             if (typeof a.onendinit === 'function') {
                                 try {
                                     a.onendinit(a.option);
                                 } catch (e) {
-                                    console.error("[brooder] onendinit called error with module of " + ths.type() + " Message:" + e.stack);
+                                    console.error("[axes] onendinit called error with module of " + ths.type() + " Message:" + e.stack);
                                 }
                             }
                             fn && fn();
@@ -6525,24 +6552,24 @@
                                     try {
                                         aa.oninitchild({id: subid, type: subview});
                                     } catch (e) {
-                                        console.error("[brooder] oninitchild called error with module of " + ths.type() + " Message:" + e.stack);
+                                        console.error("[axes] oninitchild called error with module of " + ths.type() + " Message:" + e.stack);
                                     }
                                 }
                                 module.get(aa.type(), subview, null, function (k) {
                                     for (var i = k.__adapt__._extendslink.length - 1; i >= 0; i--) {
-                                        brooder.extend(ops, aa.option[k.__adapt__._extendslink[i]]);
+                                        axes.extend(ops, aa.option[k.__adapt__._extendslink[i]]);
                                     }
-                                    brooder.extend(ops, aa.option[subid]);
+                                    axes.extend(ops, aa.option[subid]);
                                     var tops = null;
                                     if (typeof aa.onoption === 'function') {
                                         try {
                                             tops = aa.onoption.call(aa, ops, subview, subid);
-                                            brooder.extend(ops, tops);
+                                            axes.extend(ops, tops);
                                         } catch (e) {
-                                            console.error("[brooder] onoption called error with module of " + ths.type() + " Message:" + e.stack);
+                                            console.error("[axes] onoption called error with module of " + ths.type() + " Message:" + e.stack);
                                         }
                                     }
-                                    brooder.extend(k.option, ops);
+                                    axes.extend(k.option, ops);
                                     if (!dom.data("-view-")) {
                                         var obj = k;
                                         obj.dom = dom;
@@ -6557,7 +6584,7 @@
                                 });
                             }, function () {
                                 this.next(ths);
-                            }, brooder(this));
+                            }, axes(this));
                         });
                         queue.run(ths);
                     });
@@ -6569,7 +6596,7 @@
             return this;
         },
         _addChild: function (option, callback) {
-            var ths = this, ops = brooder.extend({type: null,
+            var ths = this, ops = axes.extend({type: null,
                 option: "",
                 parameters: null,
                 id: this.getId() + "-" + this.children.length,
@@ -6590,8 +6617,8 @@
                         ths.children.splice(xindex, 0, sobj);
                     }
                     var cln = sobj.__adapt__._factory.mapping[sobj.__adapt__._type].prototype.fullClassName;
-                    var coner = brooder(ops.container);
-                    var pdom = brooder("<" + sobj.tagName + " class='" + cln + "' data-parent-view='" + ths.getId() + "' data-view='" + ops.type + "' data-view-id='" + ops.id + "' data-option='" + (is.isObject(ops.option) ? "" : ops.option) + "'></" + sobj.tagName + ">");
+                    var coner = axes(ops.container);
+                    var pdom = axes("<" + sobj.tagName + " class='" + cln + "' data-parent-view='" + ths.getId() + "' data-view='" + ops.type + "' data-view-id='" + ops.id + "' data-option='" + (is.isObject(ops.option) ? "" : ops.option) + "'></" + sobj.tagName + ">");
                     if (is.isNumber(ops.domIndex)) {
                         var p = coner.children(ops.domIndex);
                         if (p.length > 0) {
@@ -6604,11 +6631,11 @@
                     }
                     var opss = {};
                     for (var i = sobj.__adapt__._extendslink.length - 1; i >= 0; i--) {
-                        brooder.extend(opss, ths.option[sobj.__adapt__._extendslink[i]]);
+                        axes.extend(opss, ths.option[sobj.__adapt__._extendslink[i]]);
                     }
-                    brooder.extend(opss, brooder.json.clone(sobj.__adapt__._option));
-                    brooder.extend(opss, ths.option[ops.id]);
-                    brooder.extend(opss, ths.option[ops.type]);
+                    axes.extend(opss, axes.json.clone(sobj.__adapt__._option));
+                    axes.extend(opss, ths.option[ops.id]);
+                    axes.extend(opss, ths.option[ops.type]);
                     if (is.isObject(ops.option)) {
                         var tp = {};
                         tp.override = ops.option.override || {};
@@ -6621,7 +6648,7 @@
                                 }
                             }
                         }
-                        sobj.option = brooder.extend(opss, tp);
+                        sobj.option = axes.extend(opss, tp);
                         for (var i in sobj.option.override) {
                             if (!module.regs.a.test(i)) {
                                 sobj[i] = sobj.option.override[i];
@@ -6640,7 +6667,7 @@
                             try {
                                 ths.oninitchild({id: sobj.getId(), type: sobj.type()});
                             } catch (e) {
-                                console.error("[brooder] oninitchild called error with module of " + ths.type() + " [" + e.message + "]");
+                                console.error("[axes] oninitchild called error with module of " + ths.type() + " [" + e.message + "]");
                             }
                         }
                         callback && callback.call(sobj);
@@ -6685,7 +6712,7 @@
             return r;
         },
         getChildAt: function (index) {
-            if (brooder.is.isNumber(index) && index >= 0 && index < this.children.length) {
+            if (axes.is.isNumber(index) && index >= 0 && index < this.children.length) {
                 return this.children[index];
             } else {
                 return null;
@@ -6706,7 +6733,7 @@
             return this.children.indexOf(view) !== -1;
         },
         getFirstChild: function (type) {
-            if (brooder.is.isAvalid(type)) {
+            if (axes.is.isAvalid(type)) {
                 return this.getChildrenByType(type)[0];
             } else {
                 return this.children[0];
@@ -6714,7 +6741,7 @@
         },
         getLastChild: function (type) {
             var r = null;
-            if (brooder.is.isAvalid(type)) {
+            if (axes.is.isAvalid(type)) {
                 var a = this.getChildrenByType(type);
                 if (a.length > 0) {
                     r = a[a.length - 1];
@@ -6751,7 +6778,7 @@
             if (child) {
                 this.privator("addChild", null, {
                     type: this.name,
-                    option: brooder.extend({}, this.option),
+                    option: axes.extend({}, this.option),
                     parameters: this.parameters,
                     id: id || (this.getId() + "-" + this.children.length),
                     container: this.dom.parent()
@@ -6765,7 +6792,7 @@
             return this;
         },
         removeChildAt: function (index) {
-            if (brooder.is.isNumber(index) && index > 0 && index < this.children.length) {
+            if (axes.is.isNumber(index) && index > 0 && index < this.children.length) {
                 this.children[index].remove();
             }
             return this;
@@ -6789,7 +6816,7 @@
             try {
                 this.onunload();
             } catch (e) {
-                console.error("[brooder] onunload called error with module of " + this.type() + " Message:" + e.stack);
+                console.error("[axes] onunload called error with module of " + this.type() + " Message:" + e.stack);
             }
             var parentview = this.parentView;
             if (parentview && parentview.children) {
@@ -6799,7 +6826,7 @@
                     try {
                         parentview.onchildremove && parentview.onchildremove(this);
                     } catch (e) {
-                        console.error("[brooder] onchildremove called error with module of " + parentview.type() + " Message:" + e.stack);
+                        console.error("[axes] onchildremove called error with module of " + parentview.type() + " Message:" + e.stack);
                     }
                 }
             }
@@ -6833,7 +6860,7 @@
                     }
                 }, {childList: true, subtree: true});
             }
-            console.log("[brooder] root view init.");
+            console.log("[axes] root view init.");
         }
     });
 
@@ -6846,7 +6873,7 @@
         }
     };
 
-    brooder.Plugin = function (obj) {
+    axes.Plugin = function (obj) {
         if (obj && obj.name && obj.name !== "") {
             var a = new Function("dom", "option", "this.__name__='" + obj.name + "';this.dom=dom;this.option=$.extend({},this.option,option);dom.data('" + obj.name + "',this);this.init&&this.init(dom,option);");
             a.prototype = new plugin();
@@ -6864,7 +6891,7 @@
             };
         }
     };
-    brooder.Method = function (obj) {
+    axes.Method = function (obj) {
         if (obj && obj.name && obj.name !== "") {
             $[obj.name] = function (option) {
                 if (is.isFunction(obj.action)) {
@@ -6894,7 +6921,7 @@
             return r;
         };
     }
-    brooder.overrideRequest = function (obj) {
+    axes.overrideRequest = function (obj) {
         var request = module.factory.get("request");
         var view = module.factory.get("view");
         var group = module.factory.get("viewgroup");
@@ -6908,7 +6935,7 @@
             }
         }
     };
-    brooder.overrideView = function (obj) {
+    axes.overrideView = function (obj) {
         var view = module.factory.get("view");
         var group = module.factory.get("viewgroup");
         var root = module.factory.get("root");
@@ -6920,7 +6947,7 @@
             }
         }
     };
-    brooder.overrideViewGroup = function (obj) {
+    axes.overrideViewGroup = function (obj) {
         var group = module.factory.get("viewgroup");
         for (var i in obj) {
             if (i !== "init" && i !== "option" && i !== "extend") {
@@ -6928,7 +6955,7 @@
             }
         }
     };
-    brooder.overrideRoot = function (obj) {
+    axes.overrideRoot = function (obj) {
         var group = module.factory.get("root");
         for (var i in obj) {
             if (i !== "init" && i !== "option" && i !== "extend") {
@@ -6936,7 +6963,7 @@
             }
         }
     };
-    brooder.Option = function (obj) {
+    axes.Option = function (obj) {
         if (!is.isString(obj)) {
             var optionx = obj.option, extend = [];
             if (obj.extend) {
@@ -6949,9 +6976,9 @@
             for (var i = 0; i < extend.length; i++) {
                 var a = option.has(extend[i]);
                 if (a) {
-                    brooder.extend(optionx, json.clone(a));
+                    axes.extend(optionx, json.clone(a));
                 } else {
-                    throw Error("[brooder ] can not find option with name of " + extend[i]);
+                    throw Error("[axes ] can not find option with name of " + extend[i]);
                 }
             }
             for (var i in obj.override) {
@@ -6968,8 +6995,8 @@
                     }
                 }
             }
-            if (brooder.___info) {
-                obj.name = (brooder.___info.packet ? brooder.___info.packet + "." : "") + obj.name;
+            if (axes.___info) {
+                obj.name = (axes.___info.packet ? axes.___info.packet + "." : "") + obj.name;
             }
             option.add(obj);
         } else {
@@ -6981,32 +7008,32 @@
             }
         }
     };
-    brooder.Module = function (obj) {
-        if (brooder.___info) {
-            obj.packet = brooder.___info.packet;
+    axes.Module = function (obj) {
+        if (axes.___info) {
+            obj.packet = axes.___info.packet;
         }
         module.add(obj);
     };
-    brooder.override = function (name, obj) {
+    axes.override = function (name, obj) {
         if (is.isString(name)) {
             if (is.isObject(obj)) {
                 if (!_override[name]) {
-                    _override[name] = brooder.extend(new query(), obj);
+                    _override[name] = axes.extend(new query(), obj);
                 } else {
-                    brooder.extend(_override[name], obj);
+                    axes.extend(_override[name], obj);
                 }
             }
         }
     };
-    brooder.toggle = function (name) {
+    axes.toggle = function (name) {
         if (is.isString(name)) {
             _override[name] && (dom.prototype = _override[name]);
         } else {
             dom.prototype = new query();
         }
     };
-    brooder.global = {};
-    brooder.fn = query.prototype;
-    window.brooder = brooder;
-    window.$ = brooder;
+    axes.global = {};
+    axes.fn = query.prototype;
+    window.axes = axes;
+    window.$ = axes;
 })();

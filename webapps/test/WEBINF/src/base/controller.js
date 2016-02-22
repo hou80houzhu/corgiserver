@@ -34,7 +34,7 @@ Module({
     extend: "controller",
     path: "/images",
     "/icon": function (done) {
-        done(this.getFileView(this.context.getProjectPath() + "images/aa.png"));
+        done(this.getFileView(this.getProjectInfo().getProjectPath() + "images/aa.png"));
     }
 });
 Module({
