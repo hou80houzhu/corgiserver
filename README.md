@@ -176,4 +176,6 @@ webapps/ROOT default project
 
 webapps/todo how to use mysql with corgi
 
+webapps/test how to use controller and so on
+
 webapps/doc how to write controller and custom corgi
