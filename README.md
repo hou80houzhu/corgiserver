@@ -35,22 +35,14 @@ run the server `$ corgiserver start`
 
 ```
 project
-   │
-   ├─────node_modules ($ npm install <module> --save)
-   │
-   ├──┬──WEBINF
-   │  │
-   │  ├──┬──src
-   │  │  │
-   │  │  └─────<code>
-   │  │
-   │  └─────web.json
-   │
-   ├─────<assets>
-   │
-   ├─────index.html
-   │
-   ├─────package.json
+   ├─node_modules (`$ npm install <module> --save`)
+   ├─WEBINF
+   │    ├─src
+   │    │  └─<code>
+   │    └─web.json
+   ├─<assets>
+   ├─index.html
+   └─package.json
 ```
 
 - **WEBINF** Is the project of a protected directory can not be accessed outside
