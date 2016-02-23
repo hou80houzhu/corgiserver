@@ -35,12 +35,13 @@ run the server `$ corgiserver start`
 
 ```
 project
-   ├─node_modules (`$ npm install <module> --save`)
-   ├─WEBINF
+   ├─node_modules (forbidden)=>$ npm install <module> --save
+   ├─WEBINF (forbidden)
    │    ├─src
    │    │  └─<code>
    │    └─web.json
    ├─<assets>
+   ├─...
    ├─index.html
    └─package.json
 ```
