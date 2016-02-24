@@ -35,7 +35,7 @@ run the server `$ corgiserver start`
 
 ```
 project
-   ├─node_modules (forbidden)=>$ npm install <module> --save
+   ├─node_modules (forbidden) => $ npm install <module> --save
    ├─WEBINF (forbidden)
    │    ├─src
    │    │  └─<code>
@@ -54,7 +54,7 @@ project
 
 > Third-party modules can co-exist with the project, the project can not references to each other between the third-party modules.Of course, you can use a global third-party modules.
 
-> rquire Third-party modules in the project code just like `require("@/<moduleName>");`,`"@/"` is important.
+> rquire Third-party modules in the project code just like `require("/<moduleName>");`,`"/"` is important.
 
 ## Operating Mechanism
 

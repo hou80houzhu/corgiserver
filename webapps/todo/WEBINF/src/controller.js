@@ -24,7 +24,7 @@ Module({
     extend: "@.base",
     path: "/todo",
     dao: "mysql",
-    add: function (done) {
+    "/add": function (done) {
         var ths=this;
         this.dao.transaction().then(function(){
             return this.add(ths.getTable("main").with(ths.request).set("time", new Date().getTime()));
@@ -34,12 +34,12 @@ Module({
             done(ths.getDefaultPageView("500",e.stack));
         });
     },
-    remove: function (done) {
+    "/remove": function (done) {
         this.dao.remove(this.getTable("main").with(this.request)).done(function () {
             done(this.success());
         }.bind(this));
     },
-    list: function (done) {
+    "/list": function (done) {
         this.dao.find(this.getTable("main")).done(function (a) {
             done(this.success(a));
         }.bind(this));

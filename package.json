@@ -1,6 +1,6 @@
 {
   "name": "corgiserver",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "A web server running javascript like tomcat.",
   "main": "lib/server.js",
   "bin": {
