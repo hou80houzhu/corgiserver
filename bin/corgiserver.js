@@ -2,7 +2,7 @@
 require("../lib/bright");
 var fs = require("fs");
 var server = require("../lib/server");
-var version = "0.0.7";
+var version = "0.0.14";
 
 var commander = function () {
     this._commands = {};
