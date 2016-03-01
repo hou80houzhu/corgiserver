@@ -185,39 +185,39 @@ new commander().bind("v", "show version", null, function () {
                         data: entry.getData()
                     });
                 }
-                if (path !== "") {
-                    var m = files.length;
-                    files.forEach(function (a) {
-                        console.log("[corgiserver] release " + a.path);
-                        bright.file(a.path).write(a.data).done(function () {
-                            m--;
-                            if (m === 0) {
-                                console.log("[corgiserver] realse ok,install the project");
-                                var q = path.split("/");
-                                q.splice(q.length - 1, 1);
-                                q = q.join("/")
-                                var options = {
-                                    encoding: 'utf8',
-                                    timeout: 0,
-                                    maxBuffer: 200 * 1024,
-                                    killSignal: 'SIGTERM',
-                                    setsid: false,
-                                    cwd: q,
-                                    env: null
-                                };
-                                var cp = require('child_process');
-                                cp.exec('npm install', options, function (e, stdout, stderr) {
-                                    console.log("[corgiserver] install the project end.");
-                                    server.create(projectName, q);
-                                });
-                            }
-                        });
-                    });
-                } else {
-                    console.log("[corgiserver] zhe zip file is not a corgiserver project.");
-                }
             });
             bright.file(localFolder + '/_cache_.zip').remove();
+            if (path !== "") {
+                var m = files.length;
+                files.forEach(function (a) {
+                    console.log("[corgiserver] release " + a.path);
+                    bright.file(a.path).write(a.data).done(function () {
+                        m--;
+                        if (m === 0) {
+                            console.log("[corgiserver] realse ok,install the project");
+                            var q = path.split("/");
+                            q.splice(q.length - 1, 1);
+                            q = q.join("/")
+                            var options = {
+                                encoding: 'utf8',
+                                timeout: 0,
+                                maxBuffer: 200 * 1024,
+                                killSignal: 'SIGTERM',
+                                setsid: false,
+                                cwd: q,
+                                env: null
+                            };
+                            var cp = require('child_process');
+                            cp.exec('npm install', options, function (e, stdout, stderr) {
+                                console.log("[corgiserver] install the project end.");
+                                server.create(projectName, q);
+                            });
+                        }
+                    });
+                });
+            } else {
+                console.log("[corgiserver] the zip file is not a corgiserver project.");
+            }
         });
     });
 }).call(process.argv.slice(2));
