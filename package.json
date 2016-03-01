@@ -1,6 +1,6 @@
 {
   "name": "corgiserver",
-  "version": "0.0.10",
+  "version": "0.0.12",
   "description": "A web server running javascript like tomcat.",
   "main": "lib/server.js",
   "bin": {
@@ -23,13 +23,13 @@
   "dependencies": {
     "formidable": "^1.0.17",
     "mysql": "^2.10.2",
-    "request": "^2.69.0"
+    "request": "^2.69.0",
+    "zip": "^1.2.0"
   },
   "bugs": {
     "url": "https://github.com/hou80houzhu/corgiserver/issues"
   },
   "homepage": "https://github.com/hou80houzhu/corgiserver#readme",
   "devDependencies": {},
-  "scripts": {
-  }
+  "scripts": {}
 }
