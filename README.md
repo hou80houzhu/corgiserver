@@ -179,3 +179,10 @@ webapps/todo how to use mysql with corgi
 webapps/test how to use controller and so on
 
 webapps/doc how to write controller and custom corgi
+
+## See the blog demo
+
+```
+$ corgiserver install <projectName> <localFolder> https://github.com/hou80houzhu/corgiblog/archive/master.zip
+```
+> this command will download the zip file,and build it,then you can run it with corgiserver.you can update your site too.
