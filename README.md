@@ -1,6 +1,7 @@
 ![corgiserver](https://github.com/hou80houzhu/corgiserver/raw/master/conf/pages/corgiserver.png)  [![Build Status](https://travis-ci.org/hou80houzhu/corgiserver.svg?branch=master)](https://travis-ci.org/hou80houzhu/corgiserver)
 
 [![NPM](https://nodei.co/npm/corgiserver.png?downloads=true)](https://nodei.co/npm/corgiserver/)
+[![Gitter](https://badges.gitter.im/hou80houzhu/corgiserver.svg)](https://gitter.im/hou80houzhu/corgiserver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 A web server running javascript like tomcat.
 
