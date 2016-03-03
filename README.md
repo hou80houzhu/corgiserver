@@ -65,6 +65,7 @@ Would start separately configured service project when a project starts, all the
 ## web.json
 
 - **Page** for covered server default page
+- **upload** set encoding,max form size,tmp folder
 - **Service** is used to configure the service to start with the project
 - **Filter** is used to configure a request through a filter
 
@@ -93,7 +94,6 @@ Would start separately configured service project when a project starts, all the
 
 server config under the `conf/server.json` file control
 
-- **Host** server IP
 - **Port** server port, default 8080
 - **Modules** server load module defaults to `lib/modules/base.js`
 
@@ -165,7 +165,7 @@ Configuration information object
 - `getFilter()`
 - `hasFilter()`
 - `hasService()`
-- `getPathPath()`
+- `getPagePath()`
 - `hasPage()`
 - `getServiceSize()`
 - `getFilterSize()`
@@ -234,6 +234,9 @@ Useage:
 
 ## changelog
 
+- **version 0.0.20**
+  - server automatically restart when downtime,In rare cases.
+  - upload files support
 - **version 0.0.19**
   - add redirectView,customView
   - unified version code

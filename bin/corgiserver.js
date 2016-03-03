@@ -62,27 +62,9 @@ new commander().bind("v", "show version", null, function () {
 }).bind("help", "help", null, function () {
     this.showDesc();
 }).bind("s", "start server", null, function () {
-    var cluster = require('cluster');
-    if (cluster.isMaster) {
-        cluster.fork();
-    } else {
-        require('../main.js');
-    }
-    cluster.on('death', function (worker) {
-        console.log('worker ' + worker.pid + ' died. restart...');
-        cluster.fork();
-    });
+    server.run();
 }).bind("start", "start server", null, function () {
-    var cluster = require('cluster');
-    if (cluster.isMaster) {
-        cluster.fork();
-    } else {
-        require('../main.js');
-    }
-    cluster.on('death', function (worker) {
-        console.log('worker ' + worker.pid + ' died. restart...');
-        cluster.fork();
-    });
+    server.run();
 }).bind("stop", "stop server", null, function () {
     server.stop();
 }).bind("c", "create project with a projectName and its local file path", "<projectName>,<projectPath>", function (projectName, projectPath) {
