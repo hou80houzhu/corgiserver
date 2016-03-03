@@ -6,6 +6,8 @@ A web server running javascript like tomcat.
 
 ## What is corgiserver
 
+[![Join the chat at https://gitter.im/hou80houzhu/corgiserver](https://badges.gitter.im/hou80houzhu/corgiserver.svg)](https://gitter.im/hou80houzhu/corgiserver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 corgiserver is a web server running javascript code, supports multiple projects, and ROOT as the default project. It is similar to Java Tomcat server, default resolution `.csp` file, which is a packet (specific wording javascript files) container.corgiserver is a nodejs module container.
 
 > Please refer to packet [BrightJS doc](http://brightjs.org "BrightJS")
