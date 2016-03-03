@@ -54,9 +54,9 @@ commander.prototype.showDesc = function () {
 };
 
 new commander().bind("v", "show version", null, function () {
-    console.log('version is ' + version);
+    console.log('version is ' + server.version());
 }).bind("version", "show version", null, function () {
-    console.log('version is ' + version);
+    console.log('version is ' + server.version());
 }).bind("h", "help", null, function () {
     this.showDesc();
 }).bind("help", "help", null, function () {

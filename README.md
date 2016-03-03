@@ -71,17 +71,17 @@ Would start separately configured service project when a project starts, all the
 ### corgi provides predefined service
 
 - mvcservice for implementing initialization mvc functions     
-  - database database configuration 
-     - host database IP 
-     - port database port 
-     - debug debug mode is turned on 
-     - database database name 
-     - user database user name 
-     - password database password 
-     - connectionLimit the maximum number of connections
-  - view
-     - path template path 
-     - suffix suffix template
+  - **database** database configuration 
+     - **host** database IP 
+     - **port** database port 
+     - **debug** debug mode is turned on 
+     - **database** database name 
+     - **user** database user name 
+     - **password** database password 
+     - **connectionLimit** the maximum number of connections
+  - **view**
+     - **path** template path 
+     - **suffix** suffix template
 
  
 ### corgi provided predefined filter
@@ -182,13 +182,64 @@ webapps/doc how to write controller and custom corgi
 
 ## See the blog demo
 
+Sample blog corgiblog->[github](https://github.com/hou80houzhu/corgiblog "github")
+
+**Execute the command and then run the blog**
+
 ```
 $ corgiserver install <projectName> <localFolder> https://github.com/hou80houzhu/corgiblog/archive/master.zip
 ```
-> this command will download the zip file,and build it,then you can run it with corgiserver.you can update your site too.
+> this command will download the zip file,and build it,then you can run it with corgiserver.
+> with this command you can update your site too.
 
 ## Run in linux
 
 ```
 $ nohup corgiserver s &
 ```
+
+## corgiserver useage
+
+```
+Useage:
+   v                    show version
+   version              show version
+   h                    help
+   help                 help
+   s                    start server
+   start                start server
+   stop                 stop server
+   c:<projectName>,<projectPath>
+                        create project with a projectName and its local file path
+   create:<projectName>,<projectPath>
+                        create project with a projectName and its local file path
+   r:<projectName>
+                        remove porject with projectName
+   remove:<projectName>
+                        remove porject with projectName
+   restart              restart server
+   ls                   list all the projects
+   scan                 list all the projects
+   sport:<port>
+                        set current port of corgiserver
+   ssessiontimeout:<time>
+                        set current session timeout of corgiserver
+   state                show corgiserver state
+   encache              enable to cache csp
+   discache             disable to cache csp
+   install:<projectName>,<localFolder>,<zipPath>
+                        install a website form a zip file
+```
+
+
+## changelog
+
+- **version 0.0.19**
+  - add redirectView,customView
+  - unified version code
+
+## License
+
+Copyright (c) 2016-2017 WangJinliang
+
+[MIT License](https://github.com/hou80houzhu/corgiserver/blob/master/LICENSE "MIT License")
