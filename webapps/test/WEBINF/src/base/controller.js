@@ -5,7 +5,7 @@ Module({
     name: "index",
     extend: "controller",
     path: "/",
-    "/":function(done){
+    "/": function (done) {
         done(this.getJsonView({
             aa: "aa"
         }));
@@ -95,25 +95,25 @@ Module({
     }
 });
 Module({
-    name:"request",
-    extend:"controller",
-    path:"/request",
-    "/test":function(done){
+    name: "request",
+    extend: "controller",
+    path: "/request",
+    "/test": function (done) {
         throw Error("fuck done");
         done(this.getRequestView("https://nodei.co/npm/request.png"));
     }
 });
 Module({
-    name:"custom",
-    extend:"controller",
-    path:"/custom",
-    "/test":function(done){
+    name: "custom",
+    extend: "controller",
+    path: "/custom",
+    "/test": function (done) {
         done(this.getRedirectView("htttp://www.baidu.com"));
     },
-    "/test2":function(done){
-        done(this.getCustomView({url:"http://www.google.com"},function(goon){
+    "/test2": function (done) {
+        done(this.getCustomView({url: "http://www.google.com"}, function (goon) {
             this.getResponse().setStatusCode("301");
-            this.getResponse().setHeader("Location",this.option.url);
+            this.getResponse().setHeader("Location", this.option.url);
             this.done();
         }));
     }

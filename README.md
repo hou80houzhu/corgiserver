@@ -203,38 +203,47 @@ $ nohup corgiserver s &
 
 ```
 Useage:
-   v                    show version
-   version              show version
-   h                    help
-   help                 help
-   s                    start server
-   start                start server
-   stop                 stop server
+   v                     show version
+   version               show version
+   h                     help
+   help                  help
+   s                     start server
+   start                 start server
+   stop                  stop server
    c:<projectName>,<projectPath>
-                        create project with a projectName and its local file path
+                         create project with a projectName and its local file path
    create:<projectName>,<projectPath>
-                        create project with a projectName and its local file path
+                         create project with a projectName and its local file path
    r:<projectName>
-                        remove porject with projectName
+                         remove porject with projectName
    remove:<projectName>
-                        remove porject with projectName
-   restart              restart server
-   ls                   list all the projects
-   scan                 list all the projects
+                         remove porject with projectName
+   restart               restart server
+   ls                    list all the projects
+   scan                  list all the projects
    sport:<port>
-                        set current port of corgiserver
+                         set current port of corgiserver
    ssessiontimeout:<time>
-                        set current session timeout of corgiserver
-   state                show corgiserver state
-   encache              enable to cache csp
-   discache             disable to cache csp
+                         set current session timeout of corgiserver
+   state                 show corgiserver state
+   encache               enable to cache csp
+   discache              disable to cache csp
+   remoteProjects        list all remote projects
    install:<projectName>,<localFolder>,<zipPath>
-                        install a website form a zip file
+                         install a website form a zip file
+   update:[<projectName>]
+                         update all projects which has a romote path.
+   updateremotepath:<projectName>,<zipPath>
+                         update a project remote path.
 ```
 
 
 ## changelog
 
+- **version 0.0.21**
+  - unified promise
+  - add update project command
+  - add edit project remote project command
 - **version 0.0.20**
   - server automatically restart when downtime,In rare cases.
   - upload files support
