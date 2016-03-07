@@ -303,9 +303,9 @@ var actions = {
             console.log("[corgiserver] corgiserver service is restated.");
         });
     },
-    daemonid:function(){
+    daemonid: function () {
         actions.checkDaemonThenData("daemonid").done(function (a) {
-            console.log("[corgiserver] corgiserver service pid is "+a);
+            console.log("[corgiserver] corgiserver service pid is " + a);
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
         });
@@ -319,14 +319,19 @@ var actions = {
                 t = p + logconfig.daemon;
             }
         }
-        var server = require('child_process').spawn('node', ['./lib/daemon.js'], {
-            detached: true,
-            stdio: ['ignore', fs.openSync(t, 'a'), fs.openSync(t, 'a')]
-        });
-        server.on("error", function (e) {
-            console.log(e);
-        });
-        server.unref();
+        bright.file(t).make("");
+        try {
+            var server = require('child_process').spawn('node', ['./lib/daemon.js'], {
+                detached: true,
+                stdio: ['ignore', fs.openSync(t, 'a'), fs.openSync(t, 'a')]
+            });
+            server.on("error", function (e) {
+                console.log(e);
+            });
+            server.unref();
+        } catch (e) {
+            console.log(e.stack);
+        }
         console.log('[corgiserver] corgiserver service is started.pid:' + server.pid);
     },
     getServerInfo: function () {
@@ -372,7 +377,7 @@ new commander().bind("version", "show version", null, function () {
     } else {
         console.log("parameter error.first parameter is project name,the other is project path");
     }
-}).bind("daemonpid","show the daemon process id",null,function(){
+}).bind("daemonpid", "show the daemon process id", null, function () {
     actions.daemonid();
 }).bind("remove", "remove porject with projectName", "<projectName>", function (projectName) {
     if (projectName) {
@@ -384,7 +389,7 @@ new commander().bind("version", "show version", null, function () {
     server.scan().done(function (data) {
         console.log("[corgiserver] project list:");
         data.forEach(function (a) {
-            console.log("    <" + a.name + ">      <"+a.path+">     <"+(a.remotePath?a.remotePath:"no path")+">    ");
+            console.log("    <" + a.name + ">      <" + a.path + ">     <" + (a.remotePath ? a.remotePath : "no path") + ">    ");
         });
     });
 }).bind("sport", "set current port of corgiserver", "<port>", function () {
@@ -447,3 +452,6 @@ new commander().bind("version", "show version", null, function () {
         console.log("[corgiserver] projectName,zipPath can not empty.");
     }
 }).call(process.argv.slice(2));
+process.on("uncaughtException", function (e) {
+    console.log(e.stack);
+});
