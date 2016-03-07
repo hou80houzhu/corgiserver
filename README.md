@@ -219,6 +219,7 @@ Useage:
    status                show the server running status.
    create:<projectName>,<projectPath>
                          create project with a projectName and its local file path
+   daemonpid             show the daemon process id
    remove:<projectName>
                          remove porject with projectName
    ls                    list all the projects

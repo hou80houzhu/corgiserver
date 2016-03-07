@@ -303,6 +303,13 @@ var actions = {
             console.log("[corgiserver] corgiserver service is restated.");
         });
     },
+    daemonid:function(){
+        actions.checkDaemonThenData("daemonid").done(function (a) {
+            console.log("[corgiserver] corgiserver service pid is "+a);
+        }).fail(function () {
+            console.log("[corgiserver] server is not started.start the server first.");
+        });
+    },
     startDaemon: function () {
         var p = bright.path(__dirname).parent().getPath(), t = logconfig.daemon;
         if (!logconfig.daemon) {
@@ -365,6 +372,8 @@ new commander().bind("version", "show version", null, function () {
     } else {
         console.log("parameter error.first parameter is project name,the other is project path");
     }
+}).bind("daemonpid","show the daemon process id",null,function(){
+    actions.daemonid();
 }).bind("remove", "remove porject with projectName", "<projectName>", function (projectName) {
     if (projectName) {
         server.remove(projectName);
