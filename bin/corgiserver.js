@@ -197,11 +197,11 @@ var actions = {
                         data: data || {}
                     });
                 } else {
-                    ps.resolve();
                     setTimeout(function () {
                         conn.end();
                         conn.unref();
                     }, 0);
+                    ps.resolve();
                 }
             } else if (data.type === type) {
                 ps.resolve(data.code);
@@ -289,6 +289,7 @@ var actions = {
     stopDaemon: function () {
         actions.checkDaemonThenData("stopprocess").done(function () {
             console.log("[corgiserver] corgiserver service is stopped.");
+            process.exit(0);
         }).fail(function () {
             console.log("[corgiserver] corgiserver service is not started.");
         });
@@ -351,6 +352,7 @@ var actions = {
             console.log("       heapUsed :" + " " + (a.memory.heapUsed / (1024 * 1024)).toFixed(2) + "M");
             console.log("  ------------------------------");
             console.log("      heapTotal :" + " " + (a.memory.heapTotal / (1024 * 1024)).toFixed(2) + "M");
+            console.log("");
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
         });
