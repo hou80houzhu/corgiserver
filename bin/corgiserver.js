@@ -361,6 +361,8 @@ var actions = {
 
 new commander().bind("version", "show version", null, function () {
     console.log('version is ' + server.version());
+}).bind("singlestart","just start without deamon process",null,function(){
+    require("../lib/server").run();
 }).bind("help", "help", null, function () {
     this.showDesc();
 }).bind("restart", "restart server", null, function () {

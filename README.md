@@ -211,6 +211,7 @@ $ corgiserver start
 ```
 Useage:
    version               show version
+   singlestart           just start without deamon process
    help                  help
    restart               restart server
    stop                  stop server
@@ -242,6 +243,9 @@ Useage:
 
 ## changelog
 
+- **version 0.1.3**
+  - add sinlestart command
+  - fix bugs
 - **version 0.1.0**
   - add daemon process(ipc refer to [node-easy-ipc](https://github.com/oleics/node-easy-ipc "node-easy-ipc")) 
   - add log management
