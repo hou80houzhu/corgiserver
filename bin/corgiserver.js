@@ -1,8 +1,30 @@
 #!/usr/bin/env node  
 require("../lib/bright");
 var fs = require("fs");
+var logger = require('colog');
 var server = require("../lib/server");
-var version = "0.0.14";
+var ipc = require("../lib/util/ipc");
+var ipconfig = require("../conf/server.json").ipc;
+var logconfig = require("../conf/server.json").log;
+
+var messager = function () {};
+messager.get = function () {
+    return ipc(ipconfig);
+};
+messager.send = function (type, data) {
+    var ps = bright.promise(), ipc = messager.get();
+    ipc.on('data', function (data, conn, server) {
+        ps.resolve(data.data);
+        conn.end();
+        conn.unref();
+    }).on('connect', function (conn) {
+        conn.write({
+            type: type,
+            data: data || {}
+        });
+    }).start();
+    return ps;
+};
 
 var commander = function () {
     this._commands = {};
@@ -53,122 +75,295 @@ commander.prototype.showDesc = function () {
     }
 };
 
-var installProjects = function (projectName, localFolder, zipPath, fn) {
-    console.log("[corgiserver] download the zip file <" + zipPath + ">");
-    var zip = require("zip"), request = require('request'), path = "";
-    localFolder = (localFolder + "/").replace(/[\/]+/g, "/");
-    bright.file(localFolder + "/_cache_.zip").write("").done(function () {
-        var ws = fs.createWriteStream(localFolder + '/_cache_.zip');
-        request(zipPath).on('response', function (response) {
-            var total = response.headers['content-length'], nowis = 0;
-            response.on('data', function (data) {
-                nowis += data.length;
-                var persent = Math.round((nowis / total) * 100);
-                process.stdout.clearLine();
-                process.stdout.cursorTo(0);
-                process.stdout.write('Loading... ' + persent + '%');
-                if (persent === 100) {
-                    process.stdout.write("\n");
-                }
-            });
-        }).on('error', function (err) {
-            console.log("[corgiserver] download zip file error");
-        }).pipe(ws);
-        ws.on('finish', function () {
-            console.log("[corgiserver] zip download success.Now release the files...");
-            var data = fs.readFileSync(localFolder + '/_cache_.zip');
-            var files = [];
-            zip.Reader(data).forEach(function (entry) {
-                if (entry.isFile()) {
-                    if (entry.getName().indexOf("package.json") !== -1 && path === "") {
-                        path = localFolder + entry.getName();
-                    }
-                    files.push({
-                        path: localFolder + entry.getName(),
-                        data: entry.getData()
-                    });
-                }
-            });
-            bright.file(localFolder + '/_cache_.zip').remove();
-            if (path !== "") {
-                var qe = bright.queue();
-                qe.progress(function (a) {
-                    var persent = (a.runed / a.total) * 100;
-                    process.stdout.clearLine();
-                    process.stdout.cursorTo(0);
-                    process.stdout.write('Release... ' + Math.round(persent) + '%');
-                    if (persent === 100) {
-                        process.stdout.write("\n");
+var actions = {
+    installProjects: function (projectName, localFolder, zipPath, fn) {
+        logger.log("[corgiserver] download the zip file <" + zipPath + ">");
+        var zip = require("zip"), request = require('request'), path = "";
+        localFolder = (localFolder + "/").replace(/[\/]+/g, "/");
+        bright.file(localFolder + "/_cache_.zip").write("").done(function () {
+            var ws = fs.createWriteStream(localFolder + '/_cache_.zip');
+            request(zipPath).on('response', function (response) {
+                var total = response.headers['content-length'], nowis = 0;
+                logger.progress(0, 100);
+                response.on('data', function (data) {
+                    nowis += data.length;
+                    var persent = Math.round((nowis / total) * 100);
+                    logger.progress(persent);
+                });
+            }).on('error', function (err) {
+                logger.error("[corgiserver] download zip file error");
+            }).pipe(ws);
+            ws.on('finish', function () {
+                logger.log("[corgiserver] zip download success.Now release the files...");
+                var data = fs.readFileSync(localFolder + '/_cache_.zip');
+                var files = [];
+                zip.Reader(data).forEach(function (entry) {
+                    if (entry.isFile()) {
+                        if (entry.getName().indexOf("package.json") !== -1 && path === "") {
+                            path = localFolder + entry.getName();
+                        }
+                        files.push({
+                            path: localFolder + entry.getName(),
+                            data: entry.getData()
+                        });
                     }
                 });
-                qe.complete(function () {
-                    console.log("[corgiserver] release ok,install the project...");
-                    var q = path.split("/");
-                    q.splice(q.length - 1, 1);
-                    q = q.join("/");
-                    var options = {
-                        encoding: 'utf8',
-                        timeout: 0,
-                        maxBuffer: 200 * 1024,
-                        killSignal: 'SIGTERM',
-                        setsid: false,
-                        cwd: q,
-                        env: null
-                    };
-                    var cp = require('child_process');
-                    cp.exec('npm install', options, function (e, stdout, stderr) {
-                        console.log("[corgiserver] install the project end.");
-                        fn && fn(q);
+                bright.file(localFolder + '/_cache_.zip').remove();
+                if (path !== "") {
+                    var qe = bright.queue();
+                    logger.progress(0, 100);
+                    qe.progress(function (a) {
+                        var persent = (a.runed / a.total) * 100;
+                        logger.progress(persent);
                     });
-                });
-                files.forEach(function (a) {
-                    qe.add(function () {
-                        var ths = this;
-                        bright.file(a.path).write(a.data).done(function () {
-                            ths.next();
+                    qe.complete(function () {
+                        logger.log("[corgiserver] release ok,install the project...");
+                        var q = path.split("/");
+                        q.splice(q.length - 1, 1);
+                        q = q.join("/");
+                        var options = {
+                            encoding: 'utf8',
+                            timeout: 0,
+                            maxBuffer: 200 * 1024,
+                            killSignal: 'SIGTERM',
+                            setsid: false,
+                            cwd: q,
+                            env: null
+                        };
+                        var cp = require('child_process');
+                        cp.exec('npm install', options, function (e, stdout, stderr) {
+                            logger.log("[corgiserver] install the project end.");
+                            fn && fn(q);
                         });
                     });
-                });
-                qe.run();
-            } else {
-                console.log("[corgiserver] the zip file is not a corgiserver project.");
-            }
+                    files.forEach(function (a) {
+                        qe.add(function () {
+                            var ths = this;
+                            bright.file(a.path).write(a.data).done(function () {
+                                ths.next();
+                            });
+                        });
+                    });
+                    qe.run();
+                } else {
+                    logger.log("[corgiserver] the zip file is not a corgiserver project.");
+                }
+            });
         });
-    });
+    },
+    updateProjects: function (projectname) {
+        server.getRemoteProjects().done(function (p) {
+            console.log("[corgiserver] now update projects");
+            var q = [];
+            if (projectname) {
+                for (var i in p) {
+                    if (p[i].name === projectname) {
+                        q.push(p[i]);
+                    }
+                }
+            } else {
+                q = p;
+            }
+            console.log("");
+            for (var i in q) {
+                console.log("    <" + q[i].name + ">");
+            }
+            var qe = bright.queue();
+            qe.complete(function () {
+                console.log("");
+                console.log("[corgiserver] update all projects success.now you can restart the server.");
+            });
+            q.forEach(function (a) {
+                qe.add(function () {
+                    console.log("");
+                    console.log("[corgiserver] now update project <" + a.name + ">");
+                    actions.installProjects(a.name, a.path, a.remotePath, function () {
+                        console.log("[corgiserver] project <" + a.name + "> updated.");
+                        this.next();
+                    }.bind(this));
+                });
+            });
+            qe.run();
+        });
+    },
+    checkDaemonThenData: function (type, data) {
+        var ps = bright.promise();
+        var t = bright.extend({}, ipconfig, {reconnect: false});
+        ipc(t).on("data", function (data, conn, server) {
+            if (data.type === "check") {
+                if (type) {
+                    conn.write({
+                        type: type,
+                        data: data || {}
+                    });
+                } else {
+                    ps.resolve();
+                    setTimeout(function () {
+                        conn.end();
+                        conn.unref();
+                    }, 0);
+                }
+            } else if (data.type === type) {
+                ps.resolve(data.code);
+                setTimeout(function () {
+                    conn.end();
+                    conn.unref();
+                }, 0);
+            } else {
+                ps.resolve();
+                setTimeout(function () {
+                    conn.end();
+                    conn.unref();
+                }, 0);
+            }
+        }).on('connect', function (conn) {
+            conn.write({
+                type: "check",
+                data: {}
+            });
+        }).on("error", function () {
+            ps.reject();
+        }).connect();
+        return ps;
+    },
+    checkDaemonWhenData: function (type, data) {
+        var t = bright.extend({}, ipconfig, {reconnect: false}), ps = bright.promise();
+        ipc(t).on("data", function (data, conn, server) {
+            if (data.type === "check") {
+                conn.write({
+                    type: type,
+                    data: data || {}
+                });
+            } else if (data.type === type) {
+                if (data.code === "goon") {
+                    conn.write({
+                        type: type,
+                        data: data || {}
+                    });
+                } else {
+                    ps.resolve(data.code);
+                    setTimeout(function () {
+                        conn.end();
+                        conn.unref();
+                    }, 0);
+                }
+            } else {
+                ps.resolve();
+                setTimeout(function () {
+                    conn.end();
+                    conn.unref();
+                }, 0);
+            }
+        }).on('connect', function (conn) {
+            conn.write({
+                type: "check",
+                data: {}
+            });
+        }).on("error", function (e) {
+            ps.reject();
+        }).connect();
+        return ps;
+    },
+    startServer: function () {
+        actions.checkDaemonThenData().done(function () {
+            console.log("[corgiserver] server is already started.");
+        }).fail(function () {
+            actions.startDaemon();
+            console.log("[corgiserver] server is stated.");
+        });
+    },
+    stopServer: function () {
+        actions.checkDaemonThenData("stopserver").done(function () {
+            console.log("[corgiserver] server is stopped.");
+        }).fail(function () {
+            console.log("[corgiserver] server is not started.start the server first.");
+        });
+    },
+    restartServer: function () {
+        actions.checkDaemonThenData("restartserver").done(function () {
+            console.log("[corgiserver] server is restarted.");
+        }).fail(function () {
+            console.log("[corgiserver] server is not started.start the server first.");
+        });
+    },
+    stopDaemon: function () {
+        actions.checkDaemonThenData("stopprocess").done(function () {
+            console.log("[corgiserver] corgiserver service is stopped.");
+        }).fail(function () {
+            console.log("[corgiserver] corgiserver service is not started.");
+        });
+    },
+    restartDaemon: function () {
+        actions.checkDaemonThenData("stopprocess").done(function () {
+            actions.startDaemon();
+            console.log("[corgiserver] corgiserver service is restated.");
+        }).fail(function () {
+            console.log("[corgiserver] corgiserver service is running,stop it...");
+            actions.startDaemon();
+            console.log("[corgiserver] corgiserver service is restated.");
+        });
+    },
+    startDaemon: function () {
+        var p = bright.path(__dirname).parent().getPath(), t = logconfig.daemon;
+        if (!logconfig.daemon) {
+            t = p + "log/log.log";
+        } else {
+            if (logconfig.daemon[0] !== "/" && logconfig.daemon.indexOf(":") === -1) {
+                t = p + logconfig.daemon;
+            }
+        }
+        var server = require('child_process').spawn('node', ['./lib/daemon.js'], {
+            detached: true,
+            stdio: ['ignore', fs.openSync(t, 'a'), fs.openSync(t, 'a')]
+        });
+        server.on("error", function (e) {
+            console.log(e);
+        });
+        server.unref();
+        console.log('[corgiserver] corgiserver service is started.pid:' + server.pid);
+    },
+    getServerInfo: function () {
+        actions.checkDaemonWhenData("getserverinfo").done(function (a) {
+            a = a.data;
+            console.log("");
+            logger.success("        corgiserver status:");
+            console.log("");
+            console.log("            PID :" + " " + a.pid);
+            console.log("  ------------------------------");
+            console.log("           arch :" + " " + a.arch);
+            console.log("  ------------------------------");
+            console.log("       platform :" + " " + a.platform);
+            console.log("  ------------------------------");
+            console.log("            rss :" + " " + (a.memory.rss / (1024 * 1024)).toFixed(2) + "M");
+            console.log("  ------------------------------");
+            console.log("       heapUsed :" + " " + (a.memory.heapUsed / (1024 * 1024)).toFixed(2) + "M");
+            console.log("  ------------------------------");
+            console.log("      heapTotal :" + " " + (a.memory.heapTotal / (1024 * 1024)).toFixed(2) + "M");
+        }).fail(function () {
+            console.log("[corgiserver] server is not started.start the server first.");
+        });
+    }
 };
 
-
-new commander().bind("v", "show version", null, function () {
+new commander().bind("version", "show version", null, function () {
     console.log('version is ' + server.version());
-}).bind("version", "show version", null, function () {
-    console.log('version is ' + server.version());
-}).bind("h", "help", null, function () {
-    this.showDesc();
 }).bind("help", "help", null, function () {
     this.showDesc();
-}).bind("s", "start server", null, function () {
-    server.run();
-}).bind("start", "start server", null, function () {
-    server.run();
+}).bind("restart", "restart server", null, function () {
+    actions.restartServer();
 }).bind("stop", "stop server", null, function () {
-    server.stop();
-}).bind("c", "create project with a projectName and its local file path", "<projectName>,<projectPath>", function (projectName, projectPath) {
-    if (projectName && projectPath) {
-        server.create(projectName, projectPath);
-    } else {
-        console.log("parameter error.first parameter is project name,the other is project path");
-    }
+    actions.stopServer();
+}).bind("start", "start server", null, function () {
+    actions.startServer();
+}).bind("close", "close all corgiserver service", null, function () {
+    actions.stopDaemon();
+}).bind("status", "show the server running status.", null, function () {
+    actions.getServerInfo();
 }).bind("create", "create project with a projectName and its local file path", "<projectName>,<projectPath>", function (projectName, projectPath) {
     if (projectName && projectPath) {
         server.create(projectName, projectPath);
     } else {
         console.log("parameter error.first parameter is project name,the other is project path");
-    }
-}).bind("r", "remove porject with projectName", "<projectName>", function (projectName) {
-    if (projectName) {
-        server.remove(projectName);
-    } else {
-        console.log("[corgiserver] you must input a projectName");
     }
 }).bind("remove", "remove porject with projectName", "<projectName>", function (projectName) {
     if (projectName) {
@@ -176,20 +371,11 @@ new commander().bind("v", "show version", null, function () {
     } else {
         console.log("[corgiserver] you must input a projectName");
     }
-}).bind("restart", "restart server", null, function () {
-    server.restart();
 }).bind("ls", "list all the projects", null, function () {
     server.scan().done(function (data) {
         console.log("[corgiserver] project list:");
         data.forEach(function (a) {
-            console.log("    <" + a + ">");
-        });
-    });
-}).bind("scan", "list all the projects", null, function () {
-    server.scan().done(function (data) {
-        console.log("[corgiserver] project list:");
-        data.forEach(function (a) {
-            console.log("    <" + a + ">");
+            console.log("    <" + a.name + ">      <"+a.path+">     <"+(a.remotePath?a.remotePath:"no path")+">    ");
         });
     });
 }).bind("sport", "set current port of corgiserver", "<port>", function () {
@@ -210,7 +396,7 @@ new commander().bind("v", "show version", null, function () {
     } else {
         console.log("[corgiserver] you must input session timeout time");
     }
-}).bind("state", "show corgiserver state", null, function () {
+}).bind("info", "show corgiserver state", null, function () {
     console.log("[corgiserver] server state:");
     server.getServerState().done(function (data) {
         var t = 0;
@@ -239,43 +425,12 @@ new commander().bind("v", "show version", null, function () {
         });
     });
 }).bind("install", "install a website form a zip file", "<projectName>,<localFolder>,<zipPath>", function (projectName, localFolder, zipPath) {
-    installProjects(projectName, localFolder, zipPath, function (q) {
+    actions.installProjects(projectName, localFolder, zipPath, function (q) {
         server.create(projectName, q, zipPath);
+        console.log("[corgiserver] now you can restart corgiserver...");
     });
 }).bind("update", "update all projects which has a romote path.", "[<projectName>]", function (projectname) {
-    server.getRemoteProjects().done(function (p) {
-        console.log("[corgiserver] now update projects");
-        var q = [];
-        if (projectname) {
-            for (var i in p) {
-                if (p[i].name === projectname) {
-                    q.push(p[i]);
-                }
-            }
-        } else {
-            q = p;
-        }
-        console.log("");
-        for (var i in q) {
-            console.log("    <" + q[i].name + ">");
-        }
-        var qe = bright.queue();
-        qe.complete(function () {
-            console.log("");
-            console.log("[corgiserver] update all projects success.now you can restart the server.");
-        });
-        q.forEach(function (a) {
-            qe.add(function () {
-                console.log("");
-                console.log("[corgiserver] now update project <" + a.name + ">");
-                installProjects(a.name, a.path, a.remotePath, function () {
-                    console.log("[corgiserver] project <" + a.name + "> updated.");
-                    this.next();
-                }.bind(this));
-            });
-        });
-        qe.run();
-    });
+    actions.updateProjects(projectname);
 }).bind("updateremotepath", "update a project remote path.", "<projectName>,<zipPath>", function (projectName, zipPath) {
     if (projectName && zipPath) {
         server.editProjectRemotePath(projectName, zipPath);

@@ -97,6 +97,13 @@ server config under the `conf/server.json` file control
 
 - **Port** server port, default 8080
 - **Modules** server load module defaults to `lib/modules/base.js`
+- **ipc** set process comunication option
+  - **socketPath** ipc socketpath
+  - **port** ipc port
+  - **host** ipc host
+- **log** set server log file path
+  - **server** server log path
+  - **daemon** daemon process log path 
 
 > Custom modules arranged in this order basis having
 
@@ -196,36 +203,30 @@ $ corgiserver install <projectName> <localFolder> https://github.com/hou80houzhu
 ## Run in linux
 
 ```
-$ nohup corgiserver s &
+$ corgiserver start
 ```
 
 ## corgiserver useage
 
 ```
 Useage:
-   v                     show version
    version               show version
-   h                     help
    help                  help
-   s                     start server
-   start                 start server
+   restart               restart server
    stop                  stop server
-   c:<projectName>,<projectPath>
-                         create project with a projectName and its local file path
+   start                 start server
+   close                 close all corgiserver service
+   status                show the server running status.
    create:<projectName>,<projectPath>
                          create project with a projectName and its local file path
-   r:<projectName>
-                         remove porject with projectName
    remove:<projectName>
                          remove porject with projectName
-   restart               restart server
    ls                    list all the projects
-   scan                  list all the projects
    sport:<port>
                          set current port of corgiserver
    ssessiontimeout:<time>
                          set current session timeout of corgiserver
-   state                 show corgiserver state
+   info                  show corgiserver state
    encache               enable to cache csp
    discache              disable to cache csp
    remoteProjects        list all remote projects
@@ -240,6 +241,12 @@ Useage:
 
 ## changelog
 
+- **version 0.1.0**
+  - add daemon process(ipc refer to [node-easy-ipc](https://github.com/oleics/node-easy-ipc "node-easy-ipc")) 
+  - add log management
+  - add some commands
+  - add color console
+  - remove s,r,v,h command
 - **version 0.0.21**
   - unified promise
   - add update project command

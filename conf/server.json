@@ -1,7 +1,15 @@
 {
-    "host": "localhost",
     "port": "8080",
     "modules": [
         "lib/modules/base.js"
-    ]
+    ],
+    "ipc": {
+        "socketPath": "/conf/sock/ipc.sock",
+        "port": 7100,
+        "host": "localhost"
+    },
+    "log":{
+        "server":"log/server.log",
+        "daemon":"log/log.log"
+    }
 }
