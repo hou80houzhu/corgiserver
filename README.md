@@ -244,6 +244,8 @@ Useage:
 ## changelog
 
 - **version 0.1.3**
+  - fix bugs
+- **version 0.1.3**
   - add sinlestart command
   - fix bugs
 - **version 0.1.0**

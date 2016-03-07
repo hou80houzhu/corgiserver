@@ -270,6 +270,8 @@ var actions = {
         }).fail(function () {
             actions.startDaemon();
             console.log("[corgiserver] server is stated.");
+        }).always(function(){
+            process.exit(0);
         });
     },
     stopServer: function () {
@@ -277,6 +279,8 @@ var actions = {
             console.log("[corgiserver] server is stopped.");
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
+        }).always(function(){
+            process.exit(0);
         });
     },
     restartServer: function () {
@@ -284,6 +288,8 @@ var actions = {
             console.log("[corgiserver] server is restarted.");
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
+        }).always(function(){
+            process.exit(0);
         });
     },
     stopDaemon: function () {
@@ -292,6 +298,8 @@ var actions = {
             process.exit(0);
         }).fail(function () {
             console.log("[corgiserver] corgiserver service is not started.");
+        }).always(function(){
+            process.exit(0);
         });
     },
     restartDaemon: function () {
@@ -302,6 +310,8 @@ var actions = {
             console.log("[corgiserver] corgiserver service is running,stop it...");
             actions.startDaemon();
             console.log("[corgiserver] corgiserver service is restated.");
+        }).always(function(){
+            process.exit(0);
         });
     },
     daemonid: function () {
@@ -309,6 +319,8 @@ var actions = {
             console.log("[corgiserver] corgiserver service pid is " + a);
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
+        }).always(function(){
+            process.exit(0);
         });
     },
     startDaemon: function () {
@@ -355,6 +367,8 @@ var actions = {
             console.log("");
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
+        }).always(function(){
+            process.exit(0);
         });
     }
 };
