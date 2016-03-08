@@ -7,25 +7,6 @@ var ipc = require("../lib/util/ipc");
 var ipconfig = require("../conf/server.json").ipc;
 var logconfig = require("../conf/server.json").log;
 
-var messager = function () {};
-messager.get = function () {
-    return ipc(ipconfig);
-};
-messager.send = function (type, data) {
-    var ps = bright.promise(), ipc = messager.get();
-    ipc.on('data', function (data, conn, server) {
-        ps.resolve(data.data);
-        conn.end();
-        conn.unref();
-    }).on('connect', function (conn) {
-        conn.write({
-            type: type,
-            data: data || {}
-        });
-    }).start();
-    return ps;
-};
-
 var commander = function () {
     this._commands = {};
 };
@@ -377,44 +358,46 @@ var actions = {
     }
 };
 
-new commander().bind("version", "show version", null, function () {
+new commander().bind("-version", "show version", null, function () {
     console.log('version is ' + server.version());
-}).bind("run", "just start without deamon process", null, function () {
+}).bind("-run", "just start without deamon process", null, function () {
     require("../lib/server").run();
-}).bind("help", "help", null, function () {
+}).bind("-?", "help", null, function () {
     this.showDesc();
-}).bind("restart", "restart server", null, function () {
+}).bind("-help", "help", null, function () {
+    this.showDesc();
+}).bind("-restart", "restart server", null, function () {
     actions.restartServer();
-}).bind("stop", "stop server", null, function () {
+}).bind("-stop", "stop server", null, function () {
     actions.stopServer();
-}).bind("start", "start server", null, function () {
+}).bind("-start", "start server", null, function () {
     actions.startServer();
-}).bind("kill", "close all corgiserver service", null, function () {
+}).bind("-kill", "close all corgiserver service", null, function () {
     actions.stopDaemon();
-}).bind("status", "show the server running status.", null, function () {
+}).bind("-status", "show the server running status.", null, function () {
     actions.getServerInfo();
-}).bind("create", "create project with a projectName and its local file path", "<projectName>,<projectPath>", function (projectName, projectPath) {
+}).bind("-create", "create project with a projectName and its local file path", "<projectName>,<projectPath>", function (projectName, projectPath) {
     if (projectName && projectPath) {
         server.create(projectName, projectPath);
     } else {
         console.log("parameter error.first parameter is project name,the other is project path");
     }
-}).bind("daemonpid", "show the daemon process id", null, function () {
+}).bind("-daemonpid", "show the daemon process id", null, function () {
     actions.daemonid();
-}).bind("remove", "remove porject with projectName", "<projectName>", function (projectName) {
+}).bind("-remove", "remove porject with projectName", "<projectName>", function (projectName) {
     if (projectName) {
         server.remove(projectName);
     } else {
         console.log("[corgiserver] you must input a projectName");
     }
-}).bind("ls", "list all the projects", null, function () {
+}).bind("-ls", "list all the projects", null, function () {
     server.scan().done(function (data) {
         console.log("[corgiserver] project list:");
         data.forEach(function (a) {
             console.log("    <" + a.name + ">      <" + a.path + ">     <" + (a.remotePath ? a.remotePath : "no path") + ">    ");
         });
     });
-}).bind("sport", "set current port of corgiserver", "<port>", function () {
+}).bind("-sport", "set current port of corgiserver", "<port>", function () {
     var port = arguments[0];
     if (port) {
         server.setPort(port).done(function () {
@@ -423,7 +406,7 @@ new commander().bind("version", "show version", null, function () {
     } else {
         console.log("[corgiserver] you must input a port");
     }
-}).bind("ssessiontimeout", "set current session timeout of corgiserver", "<time>", function () {
+}).bind("-ssessiontimeout", "set current session timeout of corgiserver", "<time>", function () {
     var time = arguments[0];
     if (time) {
         server.setSessionTimeout(time).done(function () {
@@ -432,8 +415,10 @@ new commander().bind("version", "show version", null, function () {
     } else {
         console.log("[corgiserver] you must input session timeout time");
     }
-}).bind("info", "show corgiserver state", null, function () {
-    console.log("[corgiserver] server state:");
+}).bind("-info", "show corgiserver info", null, function () {
+    console.log("");
+    logger.success("   corgiserver info:");
+    console.log("");
     server.getServerState().done(function (data) {
         var t = 0;
         for (var i in data) {
@@ -445,29 +430,30 @@ new commander().bind("version", "show version", null, function () {
         for (var i in data) {
             console.log("    " + i + commander.blank(t - i.length) + data[i]);
         }
+        console.log("");
     });
-}).bind("encache", "enable to cache csp", null, function () {
+}).bind("-encache", "enable to cache csp", null, function () {
     server.enableCspCache().done(function () {
         console.log("[corgiserver] enableed csp cache.");
     });
-}).bind("discache", "disable to cache csp", null, function () {
+}).bind("-discache", "disable to cache csp", null, function () {
     server.disableCspCache().done(function () {
         console.log("[corgiserver] disabled csp cache.");
     });
-}).bind("remoteProjects", "list all remote projects", null, function () {
+}).bind("-remoteprojects", "list all remote projects", null, function () {
     server.getRemoteProjects().done(function (a) {
         a.forEach(function (b) {
             console.log("      <" + b.name + ">" + "   <" + b.path + ">   <" + b.remotePath + ">");
         });
     });
-}).bind("install", "install a website form a zip file", "<projectName>,<localFolder>,<zipPath>", function (projectName, localFolder, zipPath) {
+}).bind("-install", "install a website form a zip file", "<projectName>,<localFolder>,<zipPath>", function (projectName, localFolder, zipPath) {
     actions.installProjects(projectName, localFolder, zipPath, function (q) {
         server.create(projectName, q, zipPath);
         console.log("[corgiserver] now you can restart corgiserver...");
     });
-}).bind("update", "update all projects which has a romote path.", "[<projectName>]", function (projectname) {
+}).bind("-update", "update all projects which has a romote path.", "[<projectName>]", function (projectname) {
     actions.updateProjects(projectname);
-}).bind("updateremotepath", "update a project remote path.", "<projectName>,<zipPath>", function (projectName, zipPath) {
+}).bind("-updateremotepath", "update a project remote path.", "<projectName>,<zipPath>", function (projectName, zipPath) {
     if (projectName && zipPath) {
         server.editProjectRemotePath(projectName, zipPath);
     } else {

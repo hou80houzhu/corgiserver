@@ -6,9 +6,11 @@ var actions = {
                 version: process.version,
                 pid: process.pid,
                 title: process.title,
+                uptime: process.uptime(),
                 arch: process.arch,
                 memory: process.memoryUsage(),
-                platform: process.platform
+                platform: process.platform,
+                path: process.installPrefix
             }
         };
     }
