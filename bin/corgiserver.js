@@ -200,20 +200,20 @@ var actions = {
                     setTimeout(function () {
                         conn.end();
                         conn.unref();
+                        ps.resolve();
                     }, 0);
-                    ps.resolve();
                 }
             } else if (data.type === type) {
-                ps.resolve(data.code);
                 setTimeout(function () {
                     conn.end();
                     conn.unref();
+                    ps.resolve(data.code);
                 }, 0);
             } else {
-                ps.resolve();
                 setTimeout(function () {
                     conn.end();
                     conn.unref();
+                    ps.resolve();
                 }, 0);
             }
         }).on('connect', function (conn) {
@@ -241,17 +241,17 @@ var actions = {
                         data: data || {}
                     });
                 } else {
-                    ps.resolve(data.code);
                     setTimeout(function () {
                         conn.end();
                         conn.unref();
+                        ps.resolve(data.code);
                     }, 0);
                 }
             } else {
-                ps.resolve();
                 setTimeout(function () {
                     conn.end();
                     conn.unref();
+                    ps.resolve();
                 }, 0);
             }
         }).on('connect', function (conn) {
@@ -265,12 +265,12 @@ var actions = {
         return ps;
     },
     startServer: function () {
-        actions.checkDaemonThenData().done(function () {
+        actions.checkDaemonThenData("startserver").done(function () {
             console.log("[corgiserver] server is already started.");
         }).fail(function () {
             actions.startDaemon();
             console.log("[corgiserver] server is stated.");
-        }).always(function(){
+        }).always(function () {
             process.exit(0);
         });
     },
@@ -279,7 +279,7 @@ var actions = {
             console.log("[corgiserver] server is stopped.");
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
-        }).always(function(){
+        }).always(function () {
             process.exit(0);
         });
     },
@@ -287,18 +287,18 @@ var actions = {
         actions.checkDaemonThenData("restartserver").done(function () {
             console.log("[corgiserver] server is restarted.");
         }).fail(function () {
-            console.log("[corgiserver] server is not started.start the server first.");
-        }).always(function(){
+            actions.startDaemon();
+            console.log("[corgiserver] server is stated.");
+        }).always(function () {
             process.exit(0);
         });
     },
     stopDaemon: function () {
         actions.checkDaemonThenData("stopprocess").done(function () {
             console.log("[corgiserver] corgiserver service is stopped.");
-            process.exit(0);
         }).fail(function () {
-            console.log("[corgiserver] corgiserver service is not started.");
-        }).always(function(){
+            console.log("[corgiserver] corgiserver service is not started.daemon process is not running.");
+        }).always(function () {
             process.exit(0);
         });
     },
@@ -310,7 +310,7 @@ var actions = {
             console.log("[corgiserver] corgiserver service is running,stop it...");
             actions.startDaemon();
             console.log("[corgiserver] corgiserver service is restated.");
-        }).always(function(){
+        }).always(function () {
             process.exit(0);
         });
     },
@@ -319,7 +319,7 @@ var actions = {
             console.log("[corgiserver] corgiserver service pid is " + a);
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
-        }).always(function(){
+        }).always(function () {
             process.exit(0);
         });
     },
@@ -334,7 +334,7 @@ var actions = {
         }
         bright.file(t).make("");
         try {
-            var server = require('child_process').spawn('node', ['./lib/daemon.js'], {
+            var server = require('child_process').spawn('node', [p + 'lib/daemon.js'], {
                 detached: true,
                 stdio: ['ignore', fs.openSync(t, 'a'), fs.openSync(t, 'a')]
             });
@@ -349,25 +349,29 @@ var actions = {
     },
     getServerInfo: function () {
         actions.checkDaemonWhenData("getserverinfo").done(function (a) {
-            a = a.data;
-            console.log("");
-            logger.success("        corgiserver status:");
-            console.log("");
-            console.log("            PID :" + " " + a.pid);
-            console.log("  ------------------------------");
-            console.log("           arch :" + " " + a.arch);
-            console.log("  ------------------------------");
-            console.log("       platform :" + " " + a.platform);
-            console.log("  ------------------------------");
-            console.log("            rss :" + " " + (a.memory.rss / (1024 * 1024)).toFixed(2) + "M");
-            console.log("  ------------------------------");
-            console.log("       heapUsed :" + " " + (a.memory.heapUsed / (1024 * 1024)).toFixed(2) + "M");
-            console.log("  ------------------------------");
-            console.log("      heapTotal :" + " " + (a.memory.heapTotal / (1024 * 1024)).toFixed(2) + "M");
-            console.log("");
+            if (a !== "noservice") {
+                a = a.data;
+                console.log("");
+                logger.success("        corgiserver status:");
+                console.log("");
+                console.log("            PID :" + " " + a.pid);
+                console.log("  ------------------------------");
+                console.log("           arch :" + " " + a.arch);
+                console.log("  ------------------------------");
+                console.log("       platform :" + " " + a.platform);
+                console.log("  ------------------------------");
+                console.log("            rss :" + " " + (a.memory.rss / (1024 * 1024)).toFixed(2) + "M");
+                console.log("  ------------------------------");
+                console.log("       heapUsed :" + " " + (a.memory.heapUsed / (1024 * 1024)).toFixed(2) + "M");
+                console.log("  ------------------------------");
+                console.log("      heapTotal :" + " " + (a.memory.heapTotal / (1024 * 1024)).toFixed(2) + "M");
+                console.log("");
+            } else {
+                console.log("[corgiserver] server is not started.start it first.");
+            }
         }).fail(function () {
             console.log("[corgiserver] server is not started.start the server first.");
-        }).always(function(){
+        }).always(function () {
             process.exit(0);
         });
     }
@@ -375,7 +379,7 @@ var actions = {
 
 new commander().bind("version", "show version", null, function () {
     console.log('version is ' + server.version());
-}).bind("singlestart","just start without deamon process",null,function(){
+}).bind("run", "just start without deamon process", null, function () {
     require("../lib/server").run();
 }).bind("help", "help", null, function () {
     this.showDesc();
@@ -385,7 +389,7 @@ new commander().bind("version", "show version", null, function () {
     actions.stopServer();
 }).bind("start", "start server", null, function () {
     actions.startServer();
-}).bind("close", "close all corgiserver service", null, function () {
+}).bind("kill", "close all corgiserver service", null, function () {
     actions.stopDaemon();
 }).bind("status", "show the server running status.", null, function () {
     actions.getServerInfo();
