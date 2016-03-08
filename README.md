@@ -210,34 +210,35 @@ $ corgiserver start
 
 ```
 Useage:
-   version               show version
-   singlestart           just start without deamon process
-   help                  help
-   restart               restart server
-   stop                  stop server
-   start                 start server
-   close                 close all corgiserver service
-   status                show the server running status.
-   create:<projectName>,<projectPath>
-                         create project with a projectName and its local file path
-   daemonpid             show the daemon process id
-   remove:<projectName>
-                         remove porject with projectName
-   ls                    list all the projects
-   sport:<port>
-                         set current port of corgiserver
-   ssessiontimeout:<time>
-                         set current session timeout of corgiserver
-   info                  show corgiserver state
-   encache               enable to cache csp
-   discache              disable to cache csp
-   remoteProjects        list all remote projects
-   install:<projectName>,<localFolder>,<zipPath>
-                         install a website form a zip file
-   update:[<projectName>]
-                         update all projects which has a romote path.
-   updateremotepath:<projectName>,<zipPath>
-                         update a project remote path.
+   -version               show version
+   -run                   just start without deamon process
+   -?                     help
+   -help                  help
+   -restart               restart server
+   -stop                  stop server
+   -start                 start server
+   -kill                  close all corgiserver service
+   -status                show the server running status.
+   -create:<projectName>,<projectPath>
+                          create project with a projectName and its local file path
+   -daemonpid             show the daemon process id
+   -remove:<projectName>
+                          remove porject with projectName
+   -ls                    list all the projects
+   -sport:<port>
+                          set current port of corgiserver
+   -ssessiontimeout:<time>
+                          set current session timeout of corgiserver
+   -info                  show corgiserver info
+   -encache               enable to cache csp
+   -discache              disable to cache csp
+   -remoteprojects        list all remote projects
+   -install:<projectName>,<localFolder>,<zipPath>
+                          install a website form a zip file
+   -update:[<projectName>]
+                          update all projects which has a romote path.
+   -updateremotepath:<projectName>,<zipPath>
+                          update a project remote path.
 ```
 
 
