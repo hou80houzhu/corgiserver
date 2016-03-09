@@ -29,7 +29,7 @@ goto the project folder to build the controllers.
 
 **step 4**
 
-run the server `$ corgiserver start`
+run the server `$ corgiserver -start`
 
 
 ## Project directory structure
@@ -202,12 +202,12 @@ $ corgiserver install <projectName> <localFolder> https://github.com/hou80houzhu
 
 ## Run corgiserver
 
-start withou daemon process
+start without daemon process
 
 ```
 $ corgiserver -run
 ```
-start without corgiserver daemon process,but you can use to daemon it by `nohup` in linux.
+start without corgiserver daemon process,but you can also daemon it by `nohup` in linux,or use forever.js.
 
 ```
 $ nohup corgiserver -run &
@@ -255,7 +255,7 @@ Useage:
 
 ## changelog
 
-- **version 0.1.6**
+- **version 0.1.7**
   - remove kill command
 - **version 0.1.6**
   - fix bugs
