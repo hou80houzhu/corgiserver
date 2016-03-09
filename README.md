@@ -200,10 +200,22 @@ $ corgiserver install <projectName> <localFolder> https://github.com/hou80houzhu
 > this command will download the zip file,and build it,then you can run it with corgiserver.
 > with this command you can update your site too.
 
-## Run in linux
+## Run corgiserver
+
+start withou daemon process
 
 ```
-$ corgiserver start
+$ corgiserver -run
+```
+start without corgiserver daemon process,but you can use to daemon it by `nohup` in linux.
+
+```
+$ nohup corgiserver -run &
+```
+start corgiserver with corgiserver daemon
+
+```
+$ corgiserver -start
 ```
 
 ## corgiserver useage
@@ -215,9 +227,8 @@ Useage:
    -?                     help
    -help                  help
    -restart               restart server
-   -stop                  stop server
    -start                 start server
-   -kill                  close all corgiserver service
+   -stop                  close all corgiserver service
    -status                show the server running status.
    -create:<projectName>,<projectPath>
                           create project with a projectName and its local file path
@@ -244,6 +255,8 @@ Useage:
 
 ## changelog
 
+- **version 0.1.6**
+  - remove kill command
 - **version 0.1.6**
   - fix bugs
 - **version 0.1.3**

@@ -250,7 +250,7 @@ var actions = {
             console.log("[corgiserver] server is already started.");
         }).fail(function () {
             actions.startDaemon();
-            console.log("[corgiserver] server is stated.");
+            console.log("[corgiserver] server is started.");
         }).always(function () {
             process.exit(0);
         });
@@ -326,7 +326,7 @@ var actions = {
         } catch (e) {
             console.log(e.stack);
         }
-        console.log('[corgiserver] corgiserver service is started.pid:' + server.pid);
+        console.log('[corgiserver] corgiserver service is started.daemon process pid:' + server.pid);
     },
     getServerInfo: function () {
         actions.checkDaemonWhenData("getserverinfo").done(function (a) {
@@ -368,11 +368,9 @@ new commander().bind("-version", "show version", null, function () {
     this.showDesc();
 }).bind("-restart", "restart server", null, function () {
     actions.restartServer();
-}).bind("-stop", "stop server", null, function () {
-    actions.stopServer();
 }).bind("-start", "start server", null, function () {
     actions.startServer();
-}).bind("-kill", "close all corgiserver service", null, function () {
+}).bind("-stop", "close all corgiserver service", null, function () {
     actions.stopDaemon();
 }).bind("-status", "show the server running status.", null, function () {
     actions.getServerInfo();
