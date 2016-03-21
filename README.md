@@ -255,6 +255,8 @@ Useage:
 
 ## changelog
 
+- **version 0.1.10**
+  - clean projects
 - **version 0.1.9**
   - fix bugs
 - **version 0.1.8**
