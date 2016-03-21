@@ -255,6 +255,8 @@ Useage:
 
 ## changelog
 
+- **version 0.1.9**
+  - fix bugs
 - **version 0.1.8**
   - fix bugs
 - **version 0.1.7**
