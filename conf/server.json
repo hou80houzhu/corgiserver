@@ -1,5 +1,5 @@
 {
-    "port": "8080",
+    "port": 8080,
     "modules": [
         "lib/modules/base.js"
     ],
@@ -8,8 +8,8 @@
         "port": 7100,
         "host": "localhost"
     },
-    "log":{
-        "server":"log/server.log",
-        "daemon":"log/log.log"
+    "log": {
+        "server": "log/server.log",
+        "daemon": "log/log.log"
     }
 }

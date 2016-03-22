@@ -1,6 +1,6 @@
 {
   "name": "corgiserver",
-  "version": "0.1.10",
+  "version": "0.1.12",
   "description": "A web server running javascript like tomcat.",
   "main": "lib/server.js",
   "bin": {
@@ -21,7 +21,6 @@
     "url": "https://github.com/hou80houzhu/corgiserver.git"
   },
   "dependencies": {
-    "colog": "^1.0.4",
     "events": "^1.1.0",
     "formidable": "^1.0.17",
     "lazy": "^1.0.11",

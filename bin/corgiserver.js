@@ -1,7 +1,7 @@
 #!/usr/bin/env node  
 require("../lib/bright");
 var fs = require("fs");
-var logger = require('colog');
+//var logger = require('colog');
 var server = require("../lib/server");
 var ipc = require("../lib/util/ipc");
 var ipconfig = require("../conf/server.json").ipc;
@@ -58,24 +58,31 @@ commander.prototype.showDesc = function () {
 
 var actions = {
     installProjects: function (projectName, localFolder, zipPath, fn) {
-        logger.log("[corgiserver] download the zip file <" + zipPath + ">");
+        console.log("[corgiserver] download the zip file <" + zipPath + ">");
         var zip = require("zip"), request = require('request'), path = "";
         localFolder = (localFolder + "/").replace(/[\/]+/g, "/");
         bright.file(localFolder + "/_cache_.zip").write("").done(function () {
             var ws = fs.createWriteStream(localFolder + '/_cache_.zip');
             request(zipPath).on('response', function (response) {
-                var total = response.headers['content-length'], nowis = 0;
-                logger.progress(0, 100);
+                var total = response.headers['content-length'], nowis = 0, isend = false;
                 response.on('data', function (data) {
                     nowis += data.length;
                     var persent = Math.round((nowis / total) * 100);
-                    logger.progress(persent);
+                    if (!isend) {
+                        process.stdout.clearLine();
+                        process.stdout.cursorTo(0);
+                        process.stdout.write('Loading... ' + persent + '%');
+                    }
+                    if (persent === 100 && isend === false) {
+                        process.stdout.write("\n");
+                        isend = true;
+                    }
                 });
             }).on('error', function (err) {
-                logger.error("[corgiserver] download zip file error");
+                console.error("[corgiserver] download zip file error");
             }).pipe(ws);
             ws.on('finish', function () {
-                logger.log("[corgiserver] zip download success.Now release the files...");
+                console.log("[corgiserver] zip download success.Now release the files");
                 var data = fs.readFileSync(localFolder + '/_cache_.zip');
                 var files = [];
                 zip.Reader(data).forEach(function (entry) {
@@ -91,14 +98,22 @@ var actions = {
                 });
                 bright.file(localFolder + '/_cache_.zip').remove();
                 if (path !== "") {
-                    var qe = bright.queue();
-                    logger.progress(0, 100);
+                    var qe = bright.queue(), isend = false;
                     qe.progress(function (a) {
-                        var persent = (a.runed / a.total) * 100;
-                        logger.progress(persent);
+                        var persent = Math.round((a.runed / a.total) * 100);
+                        if (!isend) {
+                            process.stdout.clearLine();
+                            process.stdout.cursorTo(0);
+                            process.stdout.write('release... ' + persent + '%');
+                        }
+                        if (persent === 100 && isend === false) {
+                            process.stdout.write("\n");
+                            isend = true;
+                        }
                     });
                     qe.complete(function () {
-                        logger.log("[corgiserver] release ok,install the project...");
+                        console.log("[corgiserver] release ok,install the project");
+                        console.log("[corgiserver] waiting...");
                         var q = path.split("/");
                         q.splice(q.length - 1, 1);
                         q = q.join("/");
@@ -113,7 +128,7 @@ var actions = {
                         };
                         var cp = require('child_process');
                         cp.exec('npm install', options, function (e, stdout, stderr) {
-                            logger.log("[corgiserver] install the project end.");
+                            console.log("[corgiserver] install the project end.");
                             fn && fn(q);
                         });
                     });
@@ -127,7 +142,7 @@ var actions = {
                     });
                     qe.run();
                 } else {
-                    logger.log("[corgiserver] the zip file is not a corgiserver project.");
+                    console.log("[corgiserver] the zip file is not a corgiserver project.");
                 }
             });
         });
@@ -145,7 +160,6 @@ var actions = {
             } else {
                 q = p;
             }
-            console.log("");
             for (var i in q) {
                 console.log("    <" + q[i].name + ">");
             }
@@ -158,7 +172,7 @@ var actions = {
                 qe.add(function () {
                     console.log("");
                     console.log("[corgiserver] now update project <" + a.name + ">");
-                    actions.installProjects(a.name, a.path, a.remotePath, function () {
+                    actions.installProjects(a.name, a.installPath, a.remotePath, function () {
                         console.log("[corgiserver] project <" + a.name + "> updated.");
                         this.next();
                     }.bind(this));
@@ -223,9 +237,9 @@ var actions = {
                     });
                 } else {
                     setTimeout(function () {
+                        ps.resolve(data.code);
                         conn.end();
                         conn.unref();
-                        ps.resolve(data.code);
                     }, 0);
                 }
             } else {
@@ -333,7 +347,7 @@ var actions = {
             if (a !== "noservice") {
                 a = a.data;
                 console.log("");
-                logger.success("        corgiserver status:");
+                console.log("        corgiserver status:");
                 console.log("");
                 console.log("            PID :" + " " + a.pid);
                 console.log("  ------------------------------");
@@ -392,7 +406,7 @@ new commander().bind("-version", "show version", null, function () {
     server.scan().done(function (data) {
         console.log("[corgiserver] project list:");
         data.forEach(function (a) {
-            console.log("    <" + a.name + ">      <" + a.path + ">     <" + (a.remotePath ? a.remotePath : "no path") + ">    ");
+            console.log("    <" + a.name + ">      <" + a.path + ">     <" + (a.remotePath ? a.remotePath : "no path") + ">    <" + (a.installPath ? a.installPath : "no path") + ">");
         });
     });
 }).bind("-sport", "set current port of corgiserver", "<port>", function () {
@@ -415,7 +429,7 @@ new commander().bind("-version", "show version", null, function () {
     }
 }).bind("-info", "show corgiserver info", null, function () {
     console.log("");
-    logger.success("   corgiserver info:");
+    console.log("   corgiserver info:");
     console.log("");
     server.getServerState().done(function (data) {
         var t = 0;
@@ -446,7 +460,7 @@ new commander().bind("-version", "show version", null, function () {
     });
 }).bind("-install", "install a website form a zip file", "<projectName>,<localFolder>,<zipPath>", function (projectName, localFolder, zipPath) {
     actions.installProjects(projectName, localFolder, zipPath, function (q) {
-        server.create(projectName, q, zipPath);
+        server.create(projectName, q, zipPath, localFolder);
         console.log("[corgiserver] now you can restart corgiserver...");
     });
 }).bind("-update", "update all projects which has a romote path.", "[<projectName>]", function (projectname) {

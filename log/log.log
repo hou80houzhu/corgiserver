@@ -1,0 +1,12 @@
+Error: read ECONNRESET
+    at exports._errnoException (util.js:890:11)
+    at TCP.onread (net.js:550:26)
+Error: read ECONNRESET
+    at exports._errnoException (util.js:890:11)
+    at TCP.onread (net.js:550:26)
+Error: read ECONNRESET
+    at exports._errnoException (util.js:890:11)
+    at TCP.onread (net.js:550:26)
+Error: read ECONNRESET
+    at exports._errnoException (util.js:890:11)
+    at TCP.onread (net.js:550:26)

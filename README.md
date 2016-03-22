@@ -255,6 +255,10 @@ Useage:
 
 ## changelog
 
+
+- **version 0.1.12**
+  - remove colog
+  - fix CLI -update
 - **version 0.1.10**
   - clean projects
 - **version 0.1.9**
