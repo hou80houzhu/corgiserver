@@ -64,18 +64,22 @@ var actions = {
         bright.file(localFolder + "/_cache_.zip").write("").done(function () {
             var ws = fs.createWriteStream(localFolder + '/_cache_.zip');
             request(zipPath).on('response', function (response) {
-                var total = response.headers['content-length'], nowis = 0, isend = false;
+                var total = response.headers['content-length'] || "", nowis = 0, isend = false;
                 response.on('data', function (data) {
-                    nowis += data.length;
-                    var persent = Math.round((nowis / total) * 100);
-                    if (!isend) {
-                        process.stdout.clearLine();
-                        process.stdout.cursorTo(0);
-                        process.stdout.write('Loading... ' + persent + '%');
-                    }
-                    if (persent === 100 && isend === false) {
-                        process.stdout.write("\n");
-                        isend = true;
+                    if (total != "") {
+                        nowis += data.length;
+                        var persent = Math.round((nowis / total) * 100);
+                        if (!isend) {
+                            process.stdout.clearLine();
+                            process.stdout.cursorTo(0);
+                            process.stdout.write('     Downloading... ' + persent + '%');
+                        }
+                        if (persent === 100 && isend === false) {
+                            process.stdout.write("\n");
+                            isend = true;
+                        }
+                    } else {
+                        console.log("     Download...");
                     }
                 });
             }).on('error', function (err) {
@@ -104,7 +108,7 @@ var actions = {
                         if (!isend) {
                             process.stdout.clearLine();
                             process.stdout.cursorTo(0);
-                            process.stdout.write('release... ' + persent + '%');
+                            process.stdout.write('     Release... ' + persent + '%');
                         }
                         if (persent === 100 && isend === false) {
                             process.stdout.write("\n");
@@ -113,7 +117,7 @@ var actions = {
                     });
                     qe.complete(function () {
                         console.log("[corgiserver] release ok,install the project");
-                        console.log("[corgiserver] waiting...");
+                        console.log("     Building...");
                         var q = path.split("/");
                         q.splice(q.length - 1, 1);
                         q = q.join("/");
@@ -460,8 +464,9 @@ new commander().bind("-version", "show version", null, function () {
     });
 }).bind("-install", "install a website form a zip file", "<projectName>,<localFolder>,<zipPath>", function (projectName, localFolder, zipPath) {
     actions.installProjects(projectName, localFolder, zipPath, function (q) {
-        server.create(projectName, q, zipPath, localFolder);
-        console.log("[corgiserver] now you can restart corgiserver...");
+        server.create(projectName, q, zipPath, localFolder, function () {
+            console.log("[corgiserver] now you can restart corgiserver...");
+        });
     });
 }).bind("-update", "update all projects which has a romote path.", "[<projectName>]", function (projectname) {
     actions.updateProjects(projectname);

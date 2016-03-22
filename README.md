@@ -256,6 +256,8 @@ Useage:
 ## changelog
 
 
+- **version 0.1.13**
+  - beauty the CLI console
 - **version 0.1.12**
   - remove colog
   - fix CLI -update
