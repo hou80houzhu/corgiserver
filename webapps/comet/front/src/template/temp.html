@@ -1,0 +1,23 @@
+<!--[chats]-->
+<div class="chats-left">
+    <@module type="{{data.type}}"/>
+</div>
+<div class="chats-right">
+    <@module type="{{data.type}}"/>
+</div>
+<!--[chat]-->
+<div class="chat-con">
+    <div class="chat-box">
+        <%for(var i in data){%>
+        <div class="chat-box-item"><span><%=data[i].username;%></span>--><span><%=data[i].msg;%></span></div>
+        <%}%>
+    </div>
+    <div class="chat-input">
+        <div class="chat-area"><textarea data-find="msg"></textarea></div>
+        <div class="chat-btn" data-find="send">submit</div>
+    </div>
+</div>
+<div class="login-input" data-find="logincon">
+    <div class="login-name"><input type="text" placeholder="username" data-find="username"/></div>
+    <div class="login-submit" data-find="login">login</div>
+</div>

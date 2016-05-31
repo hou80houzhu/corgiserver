@@ -1,0 +1,66 @@
+.chats {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0; }
+  .chats .chats-left {
+    width: 50%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0; }
+  .chats .chats-right {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    right: 0;
+    bottom: 0; }
+
+.chat {
+  border: 1px solid #D7D7D7;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0; }
+  .chat .chat-con {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0; }
+    .chat .chat-con .chat-box {
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 50px; }
+    .chat .chat-con .chat-input {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: -webkit-flex; }
+      .chat .chat-con .chat-input .chat-area {
+        height: 50px;
+        -webkit-flex: 1; }
+        .chat .chat-con .chat-input .chat-area textarea {
+          height: 50px;
+          width: 100%;
+          -webkit-box-sizing: border-box;
+          border: 1px solid #D7D7D7; }
+      .chat .chat-con .chat-input .chat-btn {
+        width: 50px;
+        text-align: center;
+        height: 50px;
+        line-height: 50px; }
+  .chat .login-input {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    background: white; }
+
+/*# sourceMappingURL=chat.css.map */
