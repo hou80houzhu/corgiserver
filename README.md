@@ -222,40 +222,43 @@ $ corgiserver -start
 
 ```
 Useage:
-   -version               show version
-   -run                   just start without deamon process
-   -?                     help
-   -help                  help
-   -restart               restart server
-   -start                 start server
-   -stop                  close all corgiserver service
-   -status                show the server running status.
-   -create:<projectName>,<projectPath>
+   version               show version
+   run                   just start without deamon process
+   ?                     help
+   help                  help
+   restart               restart server
+   start                 start server
+   stop                  close all corgiserver service
+   status                show the server running status.
+   create:<projectName>,<projectPath>
                           create project with a projectName and its local file path
-   -daemonpid             show the daemon process id
-   -remove:<projectName>
+   daemonpid             show the daemon process id
+   remove:<projectName>
                           remove porject with projectName
-   -ls                    list all the projects
-   -sport:<port>
+   ls                    list all the projects
+   sport:<port>
                           set current port of corgiserver
-   -ssessiontimeout:<time>
+   ssessiontimeout:<time>
                           set current session timeout of corgiserver
-   -info                  show corgiserver info
-   -encache               enable to cache csp
-   -discache              disable to cache csp
-   -remoteprojects        list all remote projects
-   -install:<projectName>,<localFolder>,<zipPath>
+   info                  show corgiserver info
+   encache               enable to cache csp
+   discache              disable to cache csp
+   remoteprojects        list all remote projects
+   install:<projectName>,<localFolder>,<zipPath>
                           install a website form a zip file
-   -update:[<projectName>]
+   update:[<projectName>]
                           update all projects which has a romote path.
-   -updateremotepath:<projectName>,<zipPath>
+   updateremotepath:<projectName>,<zipPath>
                           update a project remote path.
 ```
 
 
 ## changelog
 
-
+- **version 0.2.0**
+  - http comet support
+  - remove mvcservice database option
+  - add daoservice
 - **version 0.1.13**
   - beauty the CLI console
 - **version 0.1.12**

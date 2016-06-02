@@ -1,16 +1,16 @@
 {
     "page":{"index":"index.csp"},
     "service":[
+        {"name":"daoservice","option":{
+            "host": "localhost",
+            "port":"3306",
+            "debug":false,
+            "database":"todo",
+            "user": "root",
+            "password": "",
+            "connectionLimit ": "200"   
+        }},
         {"name":"mvcservice","option":{
-            "database":{
-                "host": "localhost",
-                "port":"3306",
-                "debug":false,
-                "database":"todo",
-                "user": "root",
-                "password": "",
-                "connectionLimit ": "200"
-            },
             "view":{
                 "path":"frontend",
                 "suffix":"html"

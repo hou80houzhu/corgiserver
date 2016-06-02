@@ -1,16 +1,16 @@
 {
     "page":{},
     "service":[
+        {"name":"daoservice","option":{
+            "host": "localhost",
+            "port":"3306",
+            "debug":false,
+            "database":"home",
+            "user": "root",
+            "password": "",
+            "connectionLimit ": "200"   
+        }},
         {"name":"mvcservice","option":{
-            "database":{
-                "host": "localhost",
-                "port":"3306",
-                "debug":false,
-                "database":"home",
-                "user": "root",
-                "password": "",
-                "connectionLimit ": "200"
-            },
             "view":{
                 "path":"front",
                 "suffix":"html"
