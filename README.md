@@ -259,6 +259,7 @@ Useage:
   - http comet support
   - remove mvcservice database option
   - add daoservice
+  - add chat sample
   - not support < 0.1 version
 - **version 0.1.13**
   - beauty the CLI console
