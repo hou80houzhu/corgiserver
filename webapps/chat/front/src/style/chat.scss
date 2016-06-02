@@ -1,0 +1,200 @@
+.chats{
+    position:absolute;
+    left:0;
+    top:0;
+    right:0;
+    bottom:0;
+    .chats-left{
+        width:50%;
+        position:absolute;
+        left:0;
+        top:0;
+        bottom:0;
+    }
+    .chats-right{
+        position: absolute;
+        left:50%;
+        top:0;
+        right:0;
+        bottom:0;
+    }
+}
+.chat{
+    border:1px solid #D7D7D7;
+    position:absolute;
+    left:0;
+    top:0;
+    right:0;
+    bottom:0;
+    .chat-con{
+        position:absolute;
+        left:0;
+        top:0;
+        right:0;
+        bottom:0;
+        overflow:hidden;
+        .chat-title{
+            line-height:35px;
+            border-bottom: 1px solid #D7D7D7;
+            padding:0 10px 0 10px;
+        }
+        .chat-box{
+            position:absolute;
+            left:0;
+            top:36px;
+            right:0;
+            bottom:50px;
+            background:#F0F0F0;
+            overflow-y:auto;
+            overflow-x:hidden;
+            .chat-box-item{
+                padding:10px;
+                white-space:nowrap;
+                &.left{
+                    .a{
+                        display:inline-block;
+                        width:40px;
+                        height:40px;
+                        line-height:40px;
+                        text-align: center;
+                        background:white;
+                        border:1px solid #D7D7D7;
+                        -webkit-border-radius: 50%;
+                        vertical-align: top;
+                        font-size:12px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .b{
+                        vertical-align: top;
+                        display:inline-block;
+                        padding:10px;
+                        background:#3399FF;
+                        color:white;
+                        position:relative;
+                        margin-left:10px;
+                        white-space:normal;
+                        max-width:70%;
+                        &:after{
+                            content:"";
+                            display:block;
+                            border-top:5px solid transparent;
+                            border-right:5px solid #3399FF;
+                            border-bottom:5px solid transparent;
+                            border-left:5px solid transparent;
+                            -webkit-border-radius: 3px;
+                            position:absolute;
+                            right:100%;
+                            top:15px;
+                        }
+                    }
+                }
+                &.right{
+                    text-align: right;
+                    white-space:nowrap;
+                    .a{
+                        display:inline-block;
+                        width:40px;
+                        height:40px;
+                        line-height:40px;
+                        text-align: center;
+                        background:white;
+                        border:1px solid #D7D7D7;
+                        -webkit-border-radius: 50%;
+                        vertical-align: top;
+                        font-size:12px;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                    .b{
+                        vertical-align: top;
+                        display:inline-block;
+                        padding:10px;
+                        background:#3399FF;
+                        color:white;
+                        position:relative;
+                        margin-right:10px;
+                        /*margin-left:100px;*/
+                        white-space:normal;
+                        text-align:left;
+                        max-width:70%;
+                        &:after{
+                            content:"";
+                            display:block;
+                            border-top:5px solid transparent;
+                            border-left:5px solid #3399FF;
+                            border-bottom:5px solid transparent;
+                            border-right:5px solid transparent;
+                            position:absolute;
+                            -webkit-border-radius: 3px;
+                            left:100%;
+                            top:15px;
+                        }
+                    }
+                }
+            }
+        }
+        .chat-input{
+            position:absolute;
+            left:0;
+            right:0;
+            bottom:0;
+            display:-webkit-flex;
+            border-top:1px solid #D7D7D7;
+            .chat-area{
+                height:50px;
+                -webkit-flex:1;
+                textarea{
+                    height:50px;
+                    width:100%;
+                    -webkit-box-sizing: border-box;
+                    border:0;
+                    border-right:1px solid #D7D7D7;
+                    padding:5px;
+                }
+            }
+            .chat-btn{
+                width:70px;
+                text-align: center;
+                height:50px;
+                line-height:50px;
+            }
+        }
+    }
+    .login-input{
+        position:absolute;
+        left:0;
+        top:0;
+        right:0;
+        bottom:0;
+        background:white;
+        .login-input-con{
+            position:absolute;
+            left:50%;
+            top:50%;
+            width:260px;
+            margin-left:-130px;
+        }
+        .login-label{
+            line-height:45px;
+        }
+        .login-name{
+            line-height:45px;
+            input{
+                width:100%;
+                height:45px;
+                border:1px solid #D7D7D7;
+                -webkit-box-sizing: border-box;
+                padding:0 5px 0 5px;
+            }
+        }
+        .login-submit{
+            line-height:40px;
+            text-align:center;
+            background:#4B8BF5;
+            color:white;
+            -webkit-border-radius: 5px;
+            margin:10px 0 10px 0;
+        }
+    }
+}

@@ -31,13 +31,39 @@ Module({
     },
     "/join": function (done) {
         var username = this.request.getParameter("username");
-        done(this.success(this.getCometService().join(username)));
+        if (!this.getCometService().check(username)) {
+            var online = [];
+            this.getCometService().each(function () {
+                online.push({
+                    id:this.getChannelId()
+                });
+            });
+            this.getCometService().join(username);
+            this.getCometService().broadcast({
+                type:"userlogin",
+                id:username
+            });
+            done(this.success(online));
+        } else {
+            done(this.error("You are in chat,check it."));
+        }
+    },
+    "/send":function(done){
+        var msg = this.request.getParameter("msg"), id = this.request.getParameter("id"), to = this.request.getParameter("to");
+        this.getCometService().write(to, {
+            id: id,
+            msg: msg,
+            type: "message",
+            form:id
+        });
+        done(this.success());
     },
     "/sendto": function (done) {
         var msg = this.request.getParameter("msg"), id = this.request.getParameter("id");
-        this.getCometService().broadcastWithout(id,{
-            username:id,
-            msg:msg
+        this.getCometService().broadcastWithout(id, {
+            username: id,
+            msg: msg,
+            type: "broadcast"
         });
         done(this.success());
     },

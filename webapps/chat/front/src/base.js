@@ -21,7 +21,10 @@ Module({
     autoupdate: true,
     template: module.getTemplate("@temp", "chat"),
     init: function () {
-        this.chatMessage = [];
+        this.chatMessage = {
+            username:"",
+            message:[]
+        };
         this.render(this.chatMessage);
     },
     find_login: function (dom) {
@@ -30,8 +33,12 @@ Module({
             var username = ths.finders("username").val();
             ths.postRequest(basePath + "comet/join", {username: username}).done(function (a) {
                 this.id = a;
+                this.chatMessage.username=a;
                 this.read();
                 this.finders("logincon").remove();
+                this.update(this.chatMessage);
+            }).fail(function(a){
+                this.finders("logintip").html(a.msg);
             });
         });
     },
@@ -39,11 +46,13 @@ Module({
         var ths = this;
         dom.click(function () {
             var msg = ths.finders("msg").val();
-//            ths.chatMessage.push({
-//                username: ths.id,
-//                msg: msg
-//            });
-//            ths.update(ths.chatMessage);
+            ths.chatMessage.message.push({
+                username: ths.id,
+                msg: msg
+            });
+            ths.update(ths.chatMessage);
+            ths.finders("msg").val("");
+            ths.finders("box").scrollTop(10000000);
             ths.sendTo(msg);
         });
     },
@@ -59,8 +68,11 @@ Module({
         });
     },
     event_message:function(e){
-        this.chatMessage.push(e.data);
-        this.update(this.chatMessage);
+        if(e.data.type==="broadcast"){
+            this.chatMessage.message.push(e.data);
+            this.update(this.chatMessage);
+            this.finders("box").scrollTop(10000000);
+        }
     }
 });
 Module({

@@ -439,6 +439,14 @@
         }
         return this;
     };
+    queue.prototype.delay=function(time){
+        this.add(function(){
+            var ths=this;
+            setTimeout(function(){
+                ths.next();
+            },time);
+        });
+    };
     queue.prototype.scope = function (a) {
         if (arguments.length === 0) {
             return this._scope;
@@ -835,7 +843,7 @@
         return this;
     };
     promise.prototype.delay = function (time) {
-        this.queue.delay(time);
+        this._queue.delay(time);
         return this;
     };
     promise.prototype.isInError = function () {

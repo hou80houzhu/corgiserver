@@ -1,0 +1,38 @@
+<!--[chats]-->
+<div class="chats-left">
+    <@module type="{{data.type}}"/>
+</div>
+<div class="chats-right">
+    <@module type="{{data.type}}"/>
+</div>
+<!--[chat]-->
+<div class="chat-con">
+    <div class="chat-title">current:<%=data.username;%></div>
+    <div class="chat-box" data-find="box">
+        <%for(var i in data.message){%>
+            <%if(data.message[i].username===data.username){%>
+            <div class="chat-box-item right">
+                <span class="b"><%=data.message[i].msg;%></span>
+                <span class="a"><%=data.message[i].username;%></span>
+            </div>
+            <%}else{%>
+            <div class="chat-box-item left">
+                <span class="a"><%=data.message[i].username;%></span>
+                <span class="b"><%=data.message[i].msg;%></span>
+            </div>
+            <%}%>
+        <%}%>
+    </div>
+    <div class="chat-input">
+        <div class="chat-area"><textarea data-find="msg"></textarea></div>
+        <div class="chat-btn" data-find="send">submit</div>
+    </div>
+</div>
+<div class="login-input" data-find="logincon">
+    <div class="login-input-con">
+        <div class="login-label">Login And Join Chat</div>
+        <div class="login-name"><input type="text" placeholder="username" data-find="username"/></div>
+        <div class="login-tip" data-find="logintip"></div>
+        <div class="login-submit" data-find="login">login</div>
+    </div>
+</div>

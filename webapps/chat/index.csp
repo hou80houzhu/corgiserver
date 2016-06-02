@@ -10,7 +10,7 @@
         <script src="<%=request.getHttpPath();%>front/bright.js" type="text/javascript"></script>
         <script>
             window.basePath = "<%=request.getHttpPath();%>";
-            var boot = $.App({"basePath":"front/src/","debug":true}).boot("option.root");
+            var boot = $.App({"basePath":"front/src/","debug":true}).boot("option.chat");
         </script>
     </head>
     <body>
