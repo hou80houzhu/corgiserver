@@ -17,6 +17,11 @@ Module({
     path: "/test",
     "/test": function () {
         console.log("------controller---------");
+    },
+    "/test2":function(done){
+        done(this.getRequestView({
+            url:"http://nodejs.cn/doc/node/fs.html#fs_fs_stat_path_callback"
+        }));
     }
 });
 Module({

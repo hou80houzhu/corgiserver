@@ -1,28 +1,9 @@
 var fs = require("fs");
-var hash = require("./util/md5");
+var Hash = require("./util/md5");
+var Path = require("path");
 
-var bright = function () {};
-
+var topolr = function () {};
 var serialize = {
-    queryString: function (obj) {
-        var result = "";
-        if (obj) {
-            for (var i in obj) {
-                var val = obj[i];
-                if (is.isString(val)) {
-                    result += i + "=" + window.encodeURIComponent(val) + "&";
-                } else if (is.isObject(val) || is.isArray(val)) {
-                    result += i + "=" + window.encodeURIComponent(json.stringify(val)) + "&";
-                } else if (val instanceof FormData || val instanceof Blob || val instanceof File || val instanceof ArrayBuffer) {
-                } else {
-                    result += i + "=" + (val !== undefined && val !== null ? window.encodeURIComponent(val.toString()) : "") + "&";
-                }
-            }
-            return result.length > 0 ? result.substring(0, result.length - 1) : "";
-        } else {
-            return "";
-        }
-    },
     getURLInfo: function (str) {
         var a = str.indexOf("?"), b = str.indexOf("#"), querystring = "",
                 hashstring = "", qo = null, ho = null, host = str, port = null, protocol = null;
@@ -84,7 +65,6 @@ var serialize = {
         return serialize.getURLInfo(str).hash;
     }
 };
-
 var is = {
     isFunction: function (obj) {
         return (typeof obj === 'function') && obj.constructor === Function;
@@ -97,12 +77,6 @@ var is = {
     },
     isUndefined: function (obj) {
         return obj === undefined;
-    },
-    isWindow: function (obj) {
-        return obj !== undefined && obj !== null && obj === obj.window;
-    },
-    isDocument: function (obj) {
-        return obj !== null && obj.nodeType === obj.DOCUMENT_NODE;
     },
     isObject: function (obj) {
         return  typeof (obj) === "object" && Object.prototype.toString.call(obj).toLowerCase() === "[object object]" && !obj.length;
@@ -124,9 +98,6 @@ var is = {
     },
     isQueryString: function (str) {
         return is.isString(str) && /(^|&).*=([^&]*)(&|$)/.test(str);
-    },
-    isElement: function (e) {
-        return e && e.nodeType === 1 && e.nodeName;
     }
 };
 var json = {
@@ -232,12 +203,12 @@ var util = {
         return uuid.join('');
     }
 };
-bright.is = is;
-bright.util = util;
-bright.json = json;
-bright.extend = bright.json.cover;
-bright.serialize = serialize;
-bright.nfn = function () {};
+topolr.is = is;
+topolr.util = util;
+topolr.json = json;
+topolr.extend = topolr.json.cover;
+topolr.serialize = serialize;
+topolr.nfn = function () {};
 
 var queue = function () {
     this.list = [];
@@ -265,7 +236,7 @@ queue.prototype.add = function (fn, error, parameter) {
             error: error || null
         });
     } else {
-        throw Error("[bright]-this queue can not add task when it is not in state of init.");
+        throw Error("[topolr]-this queue can not add task when it is not in state of init.");
     }
     return this;
 };
@@ -365,7 +336,7 @@ queue.error = function (result, e) {
         this.current.error && this.current.error.call(this, result, e, this.current.parameter);
     }
 };
-bright.queue = function () {
+topolr.queue = function () {
     return new queue();
 };
 
@@ -494,7 +465,7 @@ dynamicQueue._fire = function (result) {
     }
     return this;
 };
-bright.dynamicQueue = function () {
+topolr.dynamicQueue = function () {
     return new dynamicQueue();
 };
 
@@ -668,72 +639,65 @@ promise.prototype.clean = function () {
     }
 };
 
-bright.promise = function (fn) {
+topolr.promise = function (fn) {
     return new promise(fn);
-};
-bright.all = function () {
-    var ps = $.promise();
-    if (arguments.length > 0) {
-        var a = Array.prototype.slice.call(arguments);
-        var total = a.length;
-        for (var i = 0; i < a.length; i++) {
-            a[i]._always(function () {
-                if (this.isResolve) {
-                    total = total - 1;
-                    if (total === 0) {
-                        ps.resolve();
-                    }
-                }
-            });
-        }
-    }
-    return ps;
-};
-bright.any = function () {
-    var ps = $.promise();
-    if (arguments.length > 0) {
-        var a = Array.prototype.slice.call(arguments);
-        var total = a.length, resolved = false;
-        for (var i = 0; i < a.length; i++) {
-            a[i]._always(function () {
-                total = total - 1;
-                if (this.isResolve) {
-                    resolved = true;
-                }
-                if (total === 0 && resolved) {
-                    ps.resolve();
-                }
-            });
-        }
-    }
-    return ps;
 };
 
 var file = function (path) {
-    this.path = path;
+    this._path = Path.normalize(path);
 };
-file.prototype.make = function () {
-    var dirpath = this.path;
+file.make = function (path) {
+    var dirpath = path;
     if (!fs.existsSync(dirpath)) {
-        var a = dirpath.split("/");
+        var a = dirpath.split(Path.sep);
         var pathtmp = "";
         if (a[0] === "") {
-            pathtmp = "/";
+            pathtmp = Path.sep;
         }
         for (var i = 0; i < a.length - 1; i++) {
             pathtmp += a[i];
             if (!fs.existsSync(pathtmp)) {
                 fs.mkdirSync(pathtmp);
             }
-            pathtmp += "/";
+            pathtmp += Path.sep;
         }
-        pathtmp = pathtmp + "/" + a[a.length - 1];
+        pathtmp = pathtmp + Path.sep + a[a.length - 1];
         fs.openSync(pathtmp, "w");
         fs.writeFileSync(dirpath, "");
     }
 };
+file.move = function (from, to) {
+    var ps = topolr.promise();
+    file.make(to);
+    var source = fs.createReadStream(from);
+    var dest = fs.createWriteStream(to);
+    source.pipe(dest);
+    source.on('end', function () {
+        fs.unlink(from, function () {
+            ps.resolve(new file(to));
+        });
+    });
+    source.on('error', function (err) {
+        ps.reject(err);
+    });
+    return ps;
+};
+file.copy = function (from, to) {
+    var ps = topolr.promise();
+    file.make(to);
+    var source = fs.createReadStream(from);
+    var dest = fs.createWriteStream(to);
+    source.pipe(dest);
+    source.on('end', function () {
+        ps.resolve(new file(to));
+    });
+    source.on('error', function (err) {
+        ps.reject(err);
+    });
+    return ps;
+};
 file.prototype.remove = function () {
-    var ps = bright.promise(), path = this.path;
+    var ps = topolr.promise(), path = this._path;
     if (fs.existsSync(path)) {
         var stats = fs.statSync(path);
         if (stats.isDirectory()) {
@@ -769,9 +733,9 @@ file.prototype.read = function (option) {
         encoding: "utf8",
         flag: 'r'
     };
-    bright.extend(ops, option);
-    var ps = bright.promise();
-    fs.readFile(this.path, ops, function (err, data) {
+    topolr.extend(ops, option);
+    var ps = topolr.promise();
+    fs.readFile(this._path, ops, function (err, data) {
         if (err) {
             ps.reject(err);
         } else {
@@ -781,270 +745,243 @@ file.prototype.read = function (option) {
     return ps;
 };
 file.prototype.scan = function (fn) {
-    var path = this.path;
+    var path = this._path;
     var fileList = [], folderList = [];
     var walk = function (path, fileList, folderList) {
         try {
             fs.readdirSync(path).forEach(function (item) {
-                var tmpPath = path + '/' + item, stats = fs.statSync(tmpPath);
+                var tmpPath = path + item, stats = fs.statSync(tmpPath);
                 if (stats.isDirectory()) {
-                    walk(tmpPath, fileList, folderList);
-                    folderList.push(tmpPath);
-                    fn && fn(tmpPath, false);
+                    var r = tmpPath;
+                    if (fn) {
+                        r = fn(tmpPath + Path.sep, false);
+                    }
+                    if (r !== false) {
+                        walk(tmpPath + Path.sep, fileList, folderList);
+                        if (r) {
+                            folderList.push(r);
+                        }
+                    }
                 } else {
-                    fileList.push(tmpPath);
-                    fn && fn(tmpPath, true);
+                    var r = tmpPath;
+                    if (fn) {
+                        r = fn(tmpPath, true);
+                    }
+                    if (r !== false) {
+                        if (r) {
+                            fileList.push(r);
+                        }
+                    }
                 }
             });
         } catch (e) {
         }
     };
     walk(path, fileList, folderList);
+    return fileList;
 };
-file.prototype.write = function (content) {
-    var ps = bright.promise();
-    var dirpath = this.path;
-    if (!fs.existsSync(dirpath)) {
-        var a = dirpath.split("/");
-        var pathtmp = "";
-        if (a[0] === "") {
-            pathtmp = "/";
-        }
-        for (var i = 0; i < a.length - 1; i++) {
-            pathtmp += a[i];
-            if (!fs.existsSync(pathtmp)) {
-                fs.mkdirSync(pathtmp);
+file.prototype.write = function (content, ops) {
+    var ps = topolr.promise();
+    var dirpath = this._path;
+    file.make(this._path);
+    if (ops) {
+        fs.writeFile(dirpath, content, function (err) {
+            if (err) {
+                ps.reject(err);
+            } else {
+                ps.resolve();
             }
-            pathtmp += "/";
-        }
-        pathtmp = pathtmp + "/" + a[a.length - 1];
-        fs.open(pathtmp, "w", function () {
-            fs.writeFile(dirpath, content);
-            ps.resolve();
         });
     } else {
-        fs.writeFile(dirpath, content);
-        ps.resolve();
-    }
-    return ps;
-};
-file.prototype.getAllSubFilesPath = function () {
-    var ps = bright.promise();
-    var path = this.path;
-    var fileList = [];
-    var walk = function (path, fileList) {
-        try {
-            fs.readdirSync(path).forEach(function (item) {
-                var tmpPath = path + item, stats = fs.statSync(tmpPath);
-                if (stats.isDirectory()) {
-                    walk(tmpPath + "/", fileList);
-                } else {
-                    fileList.push(tmpPath);
-                }
-            });
-        } catch (e) {
-        }
-    };
-    walk(path, fileList);
-    ps.resolve(fileList);
-    return ps;
-};
-file.prototype.getAllSubFilesPathWithSuffix = function (suffix) {
-    var ps = bright.promise(), r = [];
-    this.getAllSubFilesPath().done(function (files) {
-        files.forEach(function (p) {
-            if (suffix === "*") {
-                r.push(p);
-            } else if (p.substring(p.length - suffix.length) === suffix) {
-                r.push(p);
+        fs.writeFile(dirpath, content, ops, function (err) {
+            if (err) {
+                ps.reject(err);
+            } else {
+                ps.resolve();
             }
         });
-        ps.resolve(r);
-    });
-    return ps;
-};
-file.prototype.getSubFilesPath = function () {
-    var tmpPath = this.path, ps = bright.promise(), r = [];
-    try {
-        var stats = fs.statSync(tmpPath);
-        if (stats.isDirectory()) {
-            fs.readdirSync(tmpPath).forEach(function (item) {
-                var tmpPath = tmpPath + '/' + item;
-                var stats = fs.statSync(tmpPath);
-                if (!stats.isDirectory()) {
-                    r.push(tmpPath);
-                }
-            });
-            ps.resolve(r);
-        } else {
-            ps.resolve([]);
-        }
-    } catch (e) {
-        ps.resolve([]);
     }
     return ps;
 };
-file.prototype.getSubFoldersPath = function () {
-    var tmpPath = this.path, ps = bright.promise(), r = [];
-    try {
-        var stats = fs.statSync(tmpPath);
+file.prototype.moveTo = function (path) {
+    var p = this._path;
+    var stats = fs.statSync(p);
+    if (!stats.isDirectory()) {
+        return file.move(p, path);
+    } else {
+        var ps = topolr.promise(), stats = fs.statSync(path);
         if (stats.isDirectory()) {
-            fs.readdirSync(tmpPath).forEach(function (item) {
-                var tmpPathp = tmpPath + '/' + item;
-                var stats = fs.statSync(tmpPathp);
-                if (stats.isDirectory()) {
-                    r.push(tmpPathp);
+            var list = this.scan(function (patht, isfile) {
+                if (isfile) {
+                    return {
+                        to: Path.normalize(path + patht.substring(p.length)),
+                        form: Path.normalize(patht)
+                    };
                 }
             });
-            ps.resolve(r);
+            var queue = topolr.queue();
+            queue.complete(function () {
+                ps.resolve();
+            });
+            for (var i = 0; i < list.length; i++) {
+                queue.add(function (a, list) {
+                    var ths = this;
+                    file.move(list.from, list.to).done(function () {
+                        ths.next();
+                    });
+                }, function () {
+                    this.next();
+                }, list[i]);
+            }
+            queue.run();
         } else {
-            ps.resolve([]);
+            ps.reject();
         }
-    } catch (e) {
-        ps.resolve([]);
+        return ps;
     }
-    return ps;
 };
-file.prototype.getSubPaths = function () {
-    var tmpPath = this.path, ps = bright.promise(), f = [], fd = [];
-    try {
-        var stats = fs.statSync(tmpPath);
+file.prototype.copyTo = function (path) {
+    var p = this._path;
+    var stats = fs.statSync(p);
+    if (!stats.isDirectory()) {
+        return file.copy(p, path);
+    } else {
+        var ps = topolr.promise(), stats = fs.statSync(path);
         if (stats.isDirectory()) {
-            fs.readdirSync(tmpPath).forEach(function (item) {
-                var tmpPathp = tmpPath + '/' + item;
-                var stats = fs.statSync(tmpPathp);
-                if (stats.isDirectory()) {
-                    fd.push(tmpPathp);
-                } else {
-                    f.push(tmpPathp);
+            var list = this.scan(function (patht, isfile) {
+                if (isfile) {
+                    return {
+                        to: Path.normalize(path + patht.substring(p.length)),
+                        form: Path.normalize(patht)
+                    };
                 }
             });
-            ps.resolve({
-                file: f,
-                folder: fd
+            var queue = topolr.queue();
+            queue.complete(function () {
+                ps.resolve();
             });
+            for (var i = 0; i < list.length; i++) {
+                queue.add(function (a, list) {
+                    var ths = this;
+                    file.copy(list.from, list.to).done(function () {
+                        ths.next();
+                    });
+                }, function () {
+                    this.next();
+                }, list[i]);
+            }
+            queue.run();
         } else {
-            ps.resolve({
-                file: [],
-                folder: []
-            });
+            ps.reject();
         }
-    } catch (e) {
-        ps.resolve({
-            file: [],
-            folder: []
-        });
+        return ps;
     }
-    return ps;
 };
-file.prototype.getSubFilesPathWithSuffix = function (suffix) {
-    var tmpPath = this.path, ps = bright.promise(), r = [];
-    try {
-        var stats = fs.statSync(tmpPath);
-        if (stats.isDirectory()) {
-            files = fs.readdirSync(tmpPath);
-            files.forEach(function (item) {
-                var p = tmpPath + item;
-                var stats = fs.statSync(p);
-                if (!stats.isDirectory()) {
-                    if (suffix === "*") {
-                        r.push(p);
-                    } else if (p.substring(p.length - suffix.length) === suffix) {
-                        r.push(p);
-                    }
-                }
-            });
-            ps.resolve(r);
-        } else {
-            ps.resolve(r);
-        }
-    } catch (e) {
-        ps.resolve(r);
-    }
-    return ps;
+file.prototype.isFolder = function () {
+    var stats = fs.statSync(this._path);
+    return stats.isDirectory();
+};
+file.prototype.isFile = function () {
+    var stats = fs.statSync(this._path);
+    return !stats.isDirectory();
+};
+file.prototype.isExists = function () {
+    return fs.existsSync(this._path);
 };
 file.prototype.hash = function () {
     try {
-        if (fs.statSync(this.path).isFile()) {
-            return hash.md5(fs.readFileSync(this.path));
+        if (fs.statSync(this._path).isFile()) {
+            return Hash.md5(fs.readFileSync(this._path));
         }
     } catch (e) {
     }
     return "";
 };
-file.prototype.lastModified = function () {};
-file.prototype.move = function (path) {
-    var p = this.path, ps = bright.promise();
-    if (fs.existsSync(p)) {
-        var stats = fs.statSync(p);
-        if (!stats.isDirectory()) {
-            var source = fs.createReadStream(p);
-            var dest = fs.createWriteStream(path);
-            source.pipe(dest);
-            source.on('end', function () {
-                fs.unlink(p, function () {
-                    ps.resolve(new file(path));
-                });
-            });
-            source.on('error', function (err) {
-                ps.reject(err);
-            });
-        }
-    } else {
-        ps.reject();
+file.prototype.subscan = function (fn) {
+    var tmpPatht = this._path, r = [];
+    var stats = fs.statSync(tmpPatht);
+    if (stats.isDirectory()) {
+        fs.readdirSync(tmpPatht).forEach(function (item) {
+            var tmpPath = tmpPatht + Path.sep + item;
+            var stats = fs.statSync(tmpPath);
+            if (!stats.isDirectory()) {
+                var t = tmpPath;
+                if (fn) {
+                    t = fn(tmpPath, true);
+                }
+                if (t !== false) {
+                    if (t) {
+                        r.push(t);
+                    }
+                } else {
+                    return false;
+                }
+            } else {
+                var t = tmpPath + Path.sep;
+                if (fn) {
+                    t = fn(t, false);
+                }
+                if (t !== false) {
+                    if (t) {
+                        r.push(t);
+                    }
+                } else {
+                    return false;
+                }
+            }
+        });
     }
-    return ps;
+    return r;
 };
-file.prototype.copy = function (path) {
-    var p = this.path, ps = bright.promise();
-    if (fs.existsSync(p)) {
-        var stats = fs.statSync(p);
-        if (!stats.isDirectory()) {
-            var source = fs.createReadStream(p);
-            var dest = fs.createWriteStream(path);
-            source.pipe(dest);
-            source.on('end', function () {
-                ps.resolve(new file(path));
-            });
-            source.on('error', function (err) {
-                ps.reject(err);
-            });
-        }
-    } else {
-        ps.reject();
+file.prototype.info = function () {
+    var stats = fs.statSync(this._path);
+    console.log(stats);
+};
+file.prototype.suffix = function () {
+    var name = this.name();
+    if (name) {
+        return name.split(".").pop();
     }
-    return ps;
 };
-bright.file = function (path) {
+file.prototype.name = function () {
+    if (this.isFile()) {
+        return this._path.split(Path.sep).pop();
+    }
+    return "";
+};
+file.prototype.path = function () {
+    return this._path;
+};
+topolr.file = function (path) {
     return new file(path);
 };
 
 var path = function (path, isfolder) {
+    path = Path.normalize(path);
     if (isfolder === undefined) {
         isfolder = true;
     }
     if (isfolder) {
-        path = path.replace(/\\/g, "/");
-        if (path[path.length - 1] !== "/") {
-            path = path + "/";
+        if (path.split(Path.sep).pop() !== "") {
+            path = path + Path.sep;
         }
     }
-    this.path = path;
-    this.isfolder = isfolder;
+    this._path = path;
+    this._isfolder = isfolder;
 };
 path.prototype.parent = function () {
-    var a = this.path.split("/");
+    var a = this._path.split(Path.sep);
     a.splice(a.length - 2, 2);
-    return new path(a.join("/") + "/");
+    return new path(a.join(Path.sep) + Path.sep);
 };
-path.prototype.getPath = function () {
-    return this.path;
+path.prototype.path = function () {
+    return this._path;
 };
 path.prototype.toString = function () {
-    return this.path;
+    return this._path;
 };
 path.prototype.suffix = function () {
-    var n = this.path.split("."), suffix = "";
+    var n = this._path.split("."), suffix = "";
     if (n.length > 1) {
         suffix = n[n.length - 1] || "";
     }
@@ -1054,32 +991,32 @@ path.prototype.suffixWith = function (suffix) {
     return this.suffix() === suffix;
 };
 path.prototype.getRelativePathInfo = function (path) {
-    var base = this.path;
-    var r = "", suffix = "", c = path.split("/"), folder = false;
+    var base = this._path;
+    var r = "", suffix = "", c = path.split(Path.sep), folder = false;
     var n = c[c.length - 1].match(/\*\.[a-zA-Z*]+/);
     if (n) {
         c.splice(c.length - 1, 1);
-        path = c.join("/") + "/";
+        path = c.join(Path.sep) + Path.sep;
         suffix = n[0].substring(2);
         folder = true;
     }
-    if (path[0] === "." && path[1] === "/") {
+    if (path[0] === "." && path[1] === Path.sep) {
         r = base + path.substring(2);
     } else {
-        var a = path.match(/\.\.\//g), b = base.split("/");
+        var a = path.match(/\.\.\//g), b = base.split(Path.sep);
         if (a) {
             b.splice(b.length - a.length - 1, a.length + 1);
             path = path.substring(a.length * 3);
             if (b.length > 0) {
-                r = b.join("/") + "/" + path;
+                r = b.join(Path.sep) + Path.sep + path;
             } else {
                 r = path;
             }
         } else {
-            if (path[0] === "/") {
+            if (path[0] === Path.sep) {
                 r = base + path;
             } else {
-                r = base + "/" + path;
+                r = base + Path.sep + path;
             }
         }
     }
@@ -1089,7 +1026,10 @@ path.prototype.getRelativePathInfo = function (path) {
         folder: folder
     };
 };
-bright.path = function (p, isfolder) {
+path.prototype.isFolder = function () {
+    return this._isfolder;
+};
+topolr.path = function (p, isfolder) {
     return new path(p, isfolder);
 };
 
@@ -1101,14 +1041,14 @@ adapt._invoke = function (propName, pars) {
     var pp = [], ths = this;
     if (parent && parent.prototype[propName]) {
         var b = parent.prototype[propName];
-        if (bright.is.isFunction(b)) {
+        if (topolr.is.isFunction(b)) {
             var _a = new parent();
             var _c = Object.keys(this);
             for (var i = 0; i < _c.length; i++) {
                 _a[_c[i]] = this[_c[i]];
             }
             for (var i in self.prototype) {
-                if (bright.is.isFunction(self.prototype[i])) {
+                if (topolr.is.isFunction(self.prototype[i])) {
                     if (i !== propName) {
                         pp.push(i);
                         (function (mp) {
@@ -1153,7 +1093,7 @@ adapt.prototype.privator = function (name) {
 };
 adapt.prototype.staticor = function (name, scope) {
     var a = this.__adapt__._static["__" + name];
-    if (bright.is.isFunction(a)) {
+    if (topolr.is.isFunction(a)) {
         var paras = Array.prototype.slice.call(arguments);
         paras.splice(0, 2);
         return a.apply(scope, paras);
@@ -1257,23 +1197,23 @@ factory.prototype.def = function (obj) {
     var prpt = new adapt();
     !obj.extend && (obj.extend = ["adapt"]);
     var array = obj.extend;
-    bright.is.isString(obj.extend) && (array = [obj.extend]);
+    topolr.is.isString(obj.extend) && (array = [obj.extend]);
     a._parent = array[0];
-    var c = bright.extend({}, bright.json.clone(this.mapping[array[0]].prototype.__adapt__._option));
-    a._option = bright.extend(c, a._option);
+    var c = topolr.extend({}, topolr.json.clone(this.mapping[array[0]].prototype.__adapt__._option));
+    a._option = topolr.extend(c, a._option);
     for (var i = array.length - 1; i >= 0; i--) {
         if (array[i] !== "adapt") {
             var d = this.mapping[array[i]].prototype;
             var __mapping = {}, __private = {}, __static = {};
-            bright.extend(__mapping, bright.json.clone(d.__adapt__._mapping));
-            bright.extend(__private, d.__adapt__._private);
-            bright.extend(__static, d.__adapt__._static);
-            bright.extend(a._mapping, __mapping);
-            bright.extend(a._private, __private);
-            bright.extend(a._static, __static);
+            topolr.extend(__mapping, topolr.json.clone(d.__adapt__._mapping));
+            topolr.extend(__private, d.__adapt__._private);
+            topolr.extend(__static, d.__adapt__._static);
+            topolr.extend(a._mapping, __mapping);
+            topolr.extend(a._private, __private);
+            topolr.extend(a._static, __static);
             var q = Object.keys(d);
             for (var t = 0; t < q.length; t++) {
-                if (bright.is.isFunction(d[t])) {
+                if (topolr.is.isFunction(d[t])) {
                     if (!factory.a.test(t)) {
                         prpt[q[t]] = d[q[t]];
                     }
@@ -1293,7 +1233,7 @@ factory.prototype.def = function (obj) {
         if (factory.d.test(i)) {
             a._static[i] = obj[i];
         } else {
-            if (bright.is.isFunction(obj[i])) {
+            if (topolr.is.isFunction(obj[i])) {
                 if (factory.e.test(i)) {
                     a._private[i] = obj[i];
                 } else {
@@ -1327,8 +1267,8 @@ factory.prototype.create = function (type, option) {
     var clazz = this.mapping[name];
     if (clazz) {
         objx = new clazz();
-        var _opp = bright.extend({}, bright.json.clone(clazz.prototype.__adapt__._option));
-        objx.option = bright.extend(_opp, option);
+        var _opp = topolr.extend({}, topolr.json.clone(clazz.prototype.__adapt__._option));
+        objx.option = topolr.extend(_opp, option);
         for (var i = clazz.prototype.__adapt__._extendslink.length - 1; i >= 0; i--) {
             var p = this.mapping[clazz.prototype.__adapt__._extendslink[i]];
             if (p && p.prototype["init"]) {
@@ -1346,16 +1286,16 @@ factory.prototype.instance = function (type, option) {
         if (sg) {
             if (!fsingleton[type]) {
                 var objxx = new clazz();
-                var _opp = bright.extend({}, bright.json.clone(clazz.prototype.__adapt__._option));
-                bright.extend(_opp, option);
+                var _opp = topolr.extend({}, topolr.json.clone(clazz.prototype.__adapt__._option));
+                topolr.extend(_opp, option);
                 objxx.option = _opp;
                 fsingleton[type] = objxx;
             }
             objx = fsingleton[type];
         } else {
             objx = new clazz();
-            var _opp = bright.extend({}, bright.json.clone(clazz.prototype.__adapt__._option));
-            bright.extend(_opp, option);
+            var _opp = topolr.extend({}, topolr.json.clone(clazz.prototype.__adapt__._option));
+            topolr.extend(_opp, option);
             objx.option = _opp;
         }
     }
@@ -1363,14 +1303,14 @@ factory.prototype.instance = function (type, option) {
 };
 factory.prototype.invoke = function (clazzName, methodName, scope) {
     var a = null;
-    if (bright.is.isString(clazzName)) {
+    if (topolr.is.isString(clazzName)) {
         var j = this.mapping[clazzName];
         j && (a = new j());
-    } else if (bright.is.isObject(clazzName)) {
+    } else if (topolr.is.isObject(clazzName)) {
         a = clazzName;
     }
     if (a && a[methodName]) {
-        if (bright.is.isFunction(a[methodName]) && bright.is.isObject(scope)) {
+        if (topolr.is.isFunction(a[methodName]) && topolr.is.isObject(scope)) {
             var paras = Array.prototype.slice.call(arguments), keys = Object.keys(scope), obj = a;
             paras.splice(0, 3);
             for (var i = 0; i < keys.length; i++) {
@@ -1393,7 +1333,7 @@ factory.prototype.invoke = function (clazzName, methodName, scope) {
 factory.prototype.proxy = function (object, part, fn) {//fn(method)
     if (arguments.length > 1) {
         var some = null, proxy = null;
-        if (bright.is.isString(object)) {
+        if (topolr.is.isString(object)) {
             var _a = this.mapping[object];
             _a && (object = new _a());
         } else if (object instanceof adapt) {
@@ -1405,16 +1345,16 @@ factory.prototype.proxy = function (object, part, fn) {//fn(method)
         } else {
             object = null;
         }
-        if (bright.is.isObject(object)) {
-            if (bright.is.isArray(part)) {
+        if (topolr.is.isObject(object)) {
+            if (topolr.is.isArray(part)) {
                 some = part;
                 proxy = fn;
-            } else if (bright.is.isFunction(part)) {
+            } else if (topolr.is.isFunction(part)) {
                 proxy = part;
             }
             var a = new this.mapping[object.__adapt__._type]();
             for (var i in object) {
-                if (bright.is.isFunction(object[i])) {
+                if (topolr.is.isFunction(object[i])) {
                     if (!some || some && some.indexOf(i) !== -1) {
                         (function (methodName) {
                             a[i] = function () {
@@ -1719,7 +1659,7 @@ packet.replacePacketNames = function (info, code, projectPath) {
         if (info._packets_[index]) {
             return str[0] + info._packets_[index] + "." + key + str[str.length - 1];
         } else {
-            throw Error("[bright] packet can not find with tag of " + str + ",packet is " + info.packet);
+            throw Error("[topolr] packet can not find with tag of " + str + ",packet is " + info.packet);
         }
     }).replace(packet.isCurrentTag, function (str) {
         return str[0] + info.packet + "." + str.split("\.")[1];
@@ -1728,7 +1668,7 @@ packet.replacePacketNames = function (info, code, projectPath) {
         if (info._packets_[index]) {
             return str[0] + info._packets_[index] + str[str.length - 1];
         } else {
-            throw Error("[bright] packet can not find with tag of " + str + ",packet is " + info.packet);
+            throw Error("[topolr] packet can not find with tag of " + str + ",packet is " + info.packet);
         }
     }).replace(packet.isOther, function (str) {
         return str.substring(1);
@@ -1756,7 +1696,7 @@ packet.run = function (packetName) {
             var d = info[i].info;
             ths.requiremapping[d.packet] = d;
             var xp = info[i].code, xcode = "";
-            xp = packet.deleteR(xp) + "bright.is.isEmptyObject(module.exports)?(module.exports=exports):'';";
+            xp = packet.deleteR(xp) + "var __empty=false;for(var i in module.exports){__empty=true} if(__empty){module.exports=exports;}";
             if (d.usestrict === "true") {
                 d.usestrict = true;
                 xcode = "\"use strict\";" + xp + "//# sourceURL=" + d.path;
@@ -1779,12 +1719,12 @@ packet.run = function (packetName) {
                             }
                         });
             } catch (e) {
-                console.error("[bright] packet import error name of " + d.packet + " path of " + d.path + " Message:" + e.stack);
+                console.error("[topolr] packet import error name of " + d.packet + " path of " + d.path + " Message:" + e.stack);
             }
         }
         ths.packetmapping.push(path);
     } else {
-        throw Error("[bright] packet _depends error,maybe has circle _depends,or some file has no packet info.");
+        throw Error("[topolr] packet _depends error,maybe has circle _depends,or some file has no packet info.");
     }
 };
 packet.module = function (obj, info) {
@@ -1855,7 +1795,7 @@ packet.prototype.getModuleContainer = function () {
 packet.prototype.getPacketInfo = function (packetName) {
     return this.packets[packetName] || {};
 };
-bright.packet = function (path, basepath) {
+topolr.packet = function (path, basepath) {
     return new packet(path, basepath);
 };
 
@@ -1868,7 +1808,7 @@ var template = function (temp, macro) {
     this._session = null;
     this._caching = {};
     this._macrofn = macro || {};
-    bright.extend(this._macrofn, template.globalMacro);
+    topolr.extend(this._macrofn, template.globalMacro);
 };
 template.a = /&lt;%/g;
 template.b = /%&gt;/g;
@@ -2163,13 +2103,13 @@ template.prototype.clean = function () {
         this[i] = null;
     }
 };
-bright.template = function () {
+topolr.template = function () {
     var temp = Array.prototype.slice.call(arguments).join("");
     return new template(temp);
 };
-bright.setTemplateGlobalMacro = function (key, fn) {
+topolr.setTemplateGlobalMacro = function (key, fn) {
     if (arguments.length === 1) {
-        bright.extend(template.globalMacro, key);
+        topolr.extend(template.globalMacro, key);
     } else if (arguments.length === 2) {
         template.globalMacro[key] = fn;
     }
@@ -2177,4 +2117,4 @@ bright.setTemplateGlobalMacro = function (key, fn) {
 };
 
 
-global.bright = bright;
+module.exports = topolr;

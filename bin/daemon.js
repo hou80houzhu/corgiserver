@@ -1,5 +1,5 @@
-require("./bright");
 var fs = require("fs");
+var topolr=require("./topolr");
 var ipc = require("./util/ipc");
 var ipconfig = require("../conf/server.json").ipc;
 var logconfig = require("../conf/server.json").log;
@@ -9,17 +9,18 @@ var _data = null;
 
 var startServer = function () {
     var t = logconfig.server;
-    var p = bright.path(__dirname).parent().getPath();
+    var p = topolr.path(__dirname).parent().path();
     if (!logconfig.server) {
-        t = p + "log/server.log";
+        t = p + "../log/server.log";
     } else {
         if (logconfig.server[0] !== "/" && logconfig.server.indexOf(":") === -1) {
             t = p + logconfig.server;
         }
     }
-    bright.file(t).make("");
+    topolr.file(t).write("");
+    console.log(t);
     try {
-        worker = require('child_process').spawn('node', [p + 'main.js'], {
+        worker = require('child_process').spawn('node', [p + './bin/main.js'], {
             detached: true,
             stdio: ['ipc', fs.openSync(t, 'a'), fs.openSync(t, 'a')]
         });

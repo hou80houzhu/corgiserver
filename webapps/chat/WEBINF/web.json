@@ -13,7 +13,7 @@
             "connectionLimit ": "200"   
         }},
         {"name":"cometservice","option":{
-                "keeptime":25000,
+                "keeptime":3000,
                 "handler":"comethandler.testhandler"
         }},
         {"name":"mvcservice","option":{

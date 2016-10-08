@@ -4,11 +4,11 @@
     },
     "cspCache": false,
     "page": {
-        "304": "304.csp",
-        "404": "404.csp",
-        "500": "500.csp",
-        "403": "403.csp",
-        "index": "index.csp"
+        "304": "conf/pages/304.csp",
+        "404": "conf/pages/404.csp",
+        "500": "conf/pages/500.csp",
+        "403": "conf/pages/403.csp",
+        "index": "conf/pages/index.csp"
     },
     "mime": {
         "123": "application/vnd.lotus-1-2-3",

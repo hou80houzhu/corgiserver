@@ -1,8 +1,8 @@
 #!/usr/bin/env node  
-require("../lib/bright");
 var fs = require("fs");
-var server = require("../lib/server");
-var ipc = require("../lib/util/ipc");
+var topolr = require("./topolr");
+var server = require("./server");
+var ipc = require("./util/ipc");
 var ipconfig = require("../conf/server.json").ipc;
 var logconfig = require("../conf/server.json").log;
 
@@ -60,7 +60,7 @@ var actions = {
         console.log("[corgiserver] download the zip file <" + zipPath + ">");
         var zip = require("zip"), request = require('request'), path = "";
         localFolder = (localFolder + "/").replace(/[\/]+/g, "/");
-        bright.file(localFolder + "/_cache_.zip").write("").done(function () {
+        topolr.file(localFolder + "/_cache_.zip").write("").done(function () {
             var ws = fs.createWriteStream(localFolder + '/_cache_.zip');
             request(zipPath).on('response', function (response) {
                 var total = response.headers['content-length'] || "", nowis = 0, isend = false;
@@ -99,9 +99,9 @@ var actions = {
                         });
                     }
                 });
-                bright.file(localFolder + '/_cache_.zip').remove();
+                topolr.file(localFolder + '/_cache_.zip').remove();
                 if (path !== "") {
-                    var qe = bright.queue(), isend = false;
+                    var qe = topolr.queue(), isend = false;
                     qe.progress(function (a) {
                         var persent = Math.round((a.runed / a.total) * 100);
                         if (!isend) {
@@ -138,7 +138,7 @@ var actions = {
                     files.forEach(function (a) {
                         qe.add(function () {
                             var ths = this;
-                            bright.file(a.path).write(a.data).done(function () {
+                            topolr.file(a.path).write(a.data).done(function () {
                                 ths.next();
                             });
                         });
@@ -166,7 +166,7 @@ var actions = {
             for (var i in q) {
                 console.log("    <" + q[i].name + ">");
             }
-            var qe = bright.queue();
+            var qe = topolr.queue();
             qe.complete(function () {
                 console.log("");
                 console.log("[corgiserver] update all projects success.now you can restart the server.");
@@ -185,8 +185,8 @@ var actions = {
         });
     },
     checkDaemonThenData: function (type, data) {
-        var ps = bright.promise();
-        var t = bright.extend({}, ipconfig, {reconnect: false});
+        var ps = topolr.promise();
+        var t = topolr.extend({}, ipconfig, {reconnect: false});
         ipc(t).on("data", function (data, conn, server) {
             if (data.type === "check") {
                 if (type) {
@@ -225,7 +225,7 @@ var actions = {
         return ps;
     },
     checkDaemonWhenData: function (type, data) {
-        var t = bright.extend({}, ipconfig, {reconnect: false}), ps = bright.promise();
+        var t = topolr.extend({}, ipconfig, {reconnect: false}), ps = topolr.promise();
         ipc(t).on("data", function (data, conn, server) {
             if (data.type === "check") {
                 conn.write({
@@ -263,14 +263,18 @@ var actions = {
         return ps;
     },
     startServer: function () {
-        actions.checkDaemonThenData("startserver").done(function () {
-            console.log("[corgiserver] server is already started.");
-        }).fail(function () {
-            actions.startDaemon();
-            console.log("[corgiserver] server is started.");
-        }).always(function () {
-            process.exit(0);
-        });
+        try {
+            actions.checkDaemonThenData("startserver").done(function () {
+                console.log("[corgiserver] server is already started.");
+            }).fail(function () {
+                actions.startDaemon();
+                console.log("[corgiserver] server is started.");
+            }).always(function () {
+                process.exit(0);
+            });
+        } catch (e) {
+            console.log(e);
+        }
     },
     stopServer: function () {
         actions.checkDaemonThenData("stopserver").done(function () {
@@ -322,7 +326,7 @@ var actions = {
         });
     },
     startDaemon: function () {
-        var p = bright.path(__dirname).parent().getPath(), t = logconfig.daemon;
+        var p = topolr.path(__dirname).parent().path(), t = logconfig.daemon;
         if (!logconfig.daemon) {
             t = p + "log/log.log";
         } else {
@@ -330,9 +334,9 @@ var actions = {
                 t = p + logconfig.daemon;
             }
         }
-        bright.file(t).make("");
+        topolr.file(t).write("");
         try {
-            var server = require('child_process').spawn('node', [p + 'lib/daemon.js'], {
+            var server = require('child_process').spawn('node', [p + './bin/daemon.js'], {
                 detached: true,
                 stdio: ['ignore', fs.openSync(t, 'a'), fs.openSync(t, 'a')]
             });
@@ -378,7 +382,7 @@ var actions = {
 new commander().bind("version", "show version", null, function () {
     console.log('version is ' + server.version());
 }).bind("run", "just start without deamon process", null, function () {
-    require("../lib/server").run();
+    require("./server").run();
 }).bind("?", "help", null, function () {
     this.showDesc();
 }).bind("help", "help", null, function () {

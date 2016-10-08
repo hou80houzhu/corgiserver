@@ -31,5 +31,5 @@ process.on("message", function (data) {
         process.send("");
     }
 });
-var server = require("./lib/server");
+var server = require("./server");
 server.run();

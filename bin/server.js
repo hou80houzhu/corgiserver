@@ -1,18 +1,18 @@
-require("./bright");
+var topolr = require("./topolr");
 var formidable = require('formidable');
 var http = require('http');
-var url = require('url');
 var util = require("util");
 var project = require("./project");
 var request = require("./base/request");
 var response = require("./base/response");
 var fs = require("fs");
+var Path = require("path");
 
 var cspContainer = function () {
     this._data = {};
 };
 cspContainer.prototype.getCspContent = function (path) {
-    if (global.CorgiServer.getWebConfig().isCspCache()) {
+    if (global.CorgiServer.getWebConfig().cspCache) {
         if (!this._data[path]) {
             var r = null;
             try {
@@ -37,101 +37,25 @@ cspContainer.prototype.getCspContent = function (path) {
     }
 };
 
-var serverConfig = function (data, path) {
-    this._data = data;
-    this._basepath = path;
-};
-serverConfig.prototype.getHost = function () {
-    return this._data.host;
-};
-serverConfig.prototype.getPort = function () {
-    return this._data.port;
-};
-serverConfig.prototype.getModules = function () {
-    return this._data.modules;
-};
-serverConfig.prototype.getBasePath = function () {
-    return this._basepath;
-};
-serverConfig.prototype.getConfigPath = function () {
-    return this._basepath + "conf/";
-};
-
-var webConfig = function (data, basePath) {
-    this._data = data;
-    this._basepath = basePath;
-};
-webConfig.prototype.getSessionConfig = function () {
-    return this._data.session;
-};
-webConfig.prototype.getSessionTimeout = function () {
-    return this._data.session ? this._data.session.timeout : 2000;
-};
-webConfig.prototype.getPagePath = function (name) {
-    return this._basepath + "conf/pages/" + this._data.page[name];
-};
-webConfig.prototype.getMimeType = function (name) {
-    return this._data.mime[name];
-};
-webConfig.prototype.getBasePath = function () {
-    return this._basepath;
-};
-webConfig.prototype.getConfigPath = function () {
-    return this._basepath + "conf/";
-};
-webConfig.prototype.isCspCache = function () {
-    return this._data.cspCache === true;
-};
-
 var corgi = function () {
-    this.corgiversion = 0;
-    this.basePath = bright.path(__dirname).parent().getPath();
-    this.packagePath = this.basePath + "package.json";
-    this.configPath = this.basePath + "conf/";
-    this.serverConfigPath = this.configPath + "server.json";
-    this.webConfigPath = this.configPath + "web.json";
+    this.serverConfig = require("../conf/server");
+    this.webConfig = require("../conf/web");
+    this.packageConfig = require("../package");
+    this.basePath = topolr.path(__dirname).parent().path();
+    this.version = this.packageConfig.version;
+    this.configPath = this.basePath + "conf" + Path.sep;
     this.projects = {};
 };
-corgi.parseQueryString = function (str) {
-    var r = {};
-    if (str) {
-        str.split("&").forEach(function (a) {
-            var b = a.split("=");
-            if (!r[b[0]]) {
-                r[b[0]] = b[1];
-            } else if (bright.is.isArray(r[b[0]])) {
-                r[b[0]].push(b[1]);
-            } else {
-                r[b[0]] = [r[b[0]]];
-            }
-        });
-    }
-    return r;
-};
 corgi.prototype.startup = function () {
-    bright.file(this.packagePath).read().scope(this).then(function (data) {
-        this.corgiversion = JSON.parse(data).version;
-        return bright.file(this.serverConfigPath).read();
-    }).then(function (data) {
-        this.serverConfig = new serverConfig(JSON.parse(data), this.basePath);
-    }).then(function () {
-        return bright.file(this.webConfigPath).read();
-    }).then(function (data) {
-        this.webConfig = new webConfig(JSON.parse(data), this.basePath);
-    }).then(function () {
-        return this.getModulesCode();
-    }).then(function (code) {
-        this.initNspContainer();
+    this.getModulesCode().scope(this).then(function (code) {
+        this.initCspContainer();
         return this.initProjects(code);
     }).done(function () {
         this.initServer();
     });
 };
-corgi.prototype.version = function () {
-    return this.corgiversion;
-};
 corgi.prototype.stop = function () {
-    var queue = bright.queue();
+    var queue = topolr.queue();
     queue.complete(function () {
         console.log("[corgiserver] server is stopped.");
     });
@@ -143,50 +67,61 @@ corgi.prototype.stop = function () {
             b.stop(function () {
                 this.next(a);
             }.bind(this));
-        }, null, this.projects[i]);
+        }, function (a, e, b) {
+            console.error(e);
+            this.next();
+        }, this.projects[i]);
     }
 };
 corgi.prototype.initProjects = function (code) {
-    var path = this.basePath + "webapps", ths = this, queue = bright.queue(), ps = bright.promise();
+    var projectpath = this.basePath + "webapps", ths = this, queue = topolr.queue(), ps = topolr.promise();
     queue.complete(function () {
         ps.resolve();
     });
     queue.progress(function (a) {
         console.log("[corgiserver] project <" + a.data + "> started");
     });
-    bright.file(path).getSubPaths().done(function (data) {
-        data.folder.forEach(function (pa) {
-            var n = pa.substring(path.length + 1);
-            var t = project(pa + "/", n, false);
-            ths.projects[n] = t;
-            queue.add(function () {
-                t.run(code, function () {
-                    this.next(n);
-                }.bind(this));
-            }, function () {
-                console.log("[corgiserver] project of <" + n + "> init fail");
-                this.next();
-            });
-        });
-        data.file.forEach(function (a) {
-            if (a.indexOf(".json") !== -1) {
-                queue.add(function (a, b) {
-                    var tss = this;
-                    bright.file(b).read().done(function (data) {
-                        var n = JSON.parse(data);
-                        var t = project(n.path, n.name, true);
-                        ths.projects[n.name] = t;
-                        t.run(code, function () {
-                            tss.next(n.name);
-                        });
+    topolr.file(projectpath).subscan(function (path, isfile) {
+        if (isfile && topolr.path(path, false).suffixWidth("json")) {
+            queue.add(function (a, b) {
+                var tss = this;
+                topolr.file(b.path).read().done(function (data) {
+                    var n = JSON.parse(data);
+                    var t = project(n.path, n.name, true);
+                    b.server.projects[n.name] = t;
+                    t.run(b.code, function () {
+                        tss.next(n.name);
                     });
-                }, function () {
-                    this.next();
-                }, a);
-            }
-        });
-        queue.run();
+                });
+            }, function (a, e, b) {
+                console.error(e);
+                console.log("[corgiserver] project of <" + b.name + "> init fail");
+                this.next();
+            }, {
+                path: path,
+                code: code,
+                server: ths
+            });
+        } else {
+            queue.add(function (a, b) {
+                var t = project(b.path, b.name, false);
+                b.server.projects[b.name] = t;
+                t.run(b.code, function () {
+                    this.next(b.name);
+                }.bind(this));
+            }, function (a, e, b) {
+                console.error(e);
+                console.log("[corgiserver] project of <" + b.name + "> init fail");
+                this.next();
+            }, {
+                path: path,
+                name: path.substring(projectpath.length + Path.sep.length, path.length - Path.sep.length),
+                server: ths,
+                code: code
+            });
+        }
     });
+    queue.run();
     return ps;
 };
 corgi.prototype.initServer = function () {
@@ -198,21 +133,21 @@ corgi.prototype.initServer = function () {
             } else {
                 ths.doRequest(req, res);
             }
-        }).listen(this.serverConfig.getPort());
-        console.log("[corgiserver] server started,port:" + this.serverConfig.getPort());
+        }).listen(this.serverConfig.port);
+        console.log("[corgiserver] server started,port:" + this.serverConfig.port);
     } catch (e) {
         console.error(e.stack);
     }
 };
-corgi.prototype.initNspContainer = function () {
+corgi.prototype.initCspContainer = function () {
     this.cspContainer = new cspContainer();
-    bright.setTemplateGlobalMacro("include", function (attrs, render) {
+    topolr.setTemplateGlobalMacro("include", function (attrs, render) {
         var c = global.CorgiServer.getCspContent(this.basePath + attrs.path), t = "";
         if (!c) {
             c = "";
         }
         try {
-            var temp = bright.template(c);
+            var temp = topolr.template(c);
             temp.basePath = this.basePath;
             temp.request = this.request;
             t = temp.fn(new Function("request", "session", "data", temp.code())).render(this.request, this.request.getSession(), attrs.data);
@@ -224,7 +159,7 @@ corgi.prototype.initNspContainer = function () {
         }
         return t;
     });
-    bright.setTemplateGlobalMacro("error", function (attr, render) {
+    topolr.setTemplateGlobalMacro("error", function (attr, render) {
         var a = "";
         try {
             var stack = attr.stack;
@@ -243,24 +178,20 @@ corgi.prototype.initNspContainer = function () {
     });
 };
 corgi.prototype.getModulesCode = function () {
-    var ps = bright.promise();
-    var paths = this.serverConfig.getModules(), ths = this;
-    if (!bright.is.isArray(paths)) {
-        paths = ["lib/modules/base.js"];
-    } else {
-        if (paths.indexOf("lib/modules/base.js")===-1) {
-            paths.unshift("lib/modules/base.js");
-        }
+    var ps = topolr.promise();
+    var paths = this.serverConfig.modules, ths = this;
+    if (!topolr.is.isArray(paths)) {
+        paths = ["lib/base.js"];
     }
     if (paths.length > 0) {
-        var qe = bright.queue(), t = [];
+        var qe = topolr.queue(), t = [];
         qe.complete(function () {
             ps.resolve(t);
         });
         paths.forEach(function (path) {
             qe.add(function (a, b) {
                 var ths = this;
-                bright.file(b).read().done(function (a) {
+                topolr.file(b).read().done(function (a) {
                     t.push(a + "\n//# sourceURL=" + b);
                     ths.next();
                 });
@@ -321,14 +252,14 @@ corgi.prototype.doPostRequest = function (req, res) {
     }).on('file', function (field, _file) {
         file[field] = _file;
     }).on('end', function () {
-        info.request._data = bright.extend({}, corgi.parseQueryString(url.parse(req.url).query), post, file);
+        info.request._data = topolr.extend({}, topolr.serialize.queryObject(req.url), post, file);
         ths.triggerProject(info.project, info.request, info.response, res);
     });
     form.parse(req);
 };
 corgi.prototype.doRequest = function (req, res) {
     var info = this.getRequestInfo(req, res);
-    info.request._data = corgi.parseQueryString(url.parse(req.url).query);
+    info.request._data = topolr.serialize.queryObject(req.url);
     this.triggerProject(info.project, info.request, info.response, res);
 };
 corgi.prototype.triggerProject = function (prj, reqt, resp, res) {
@@ -338,7 +269,7 @@ corgi.prototype.triggerProject = function (prj, reqt, resp, res) {
     });
 };
 corgi.prototype.doResponse = function (view, reqt, resp, res) {
-    var serverName = "corgiserver " + this.version();
+    var serverName = "corgiserver " + this.version;
     view.doRender(function () {
         console.log("[" + reqt._project_ + "]==>[" + view.type() + "]==>[" + reqt.getURL() + "]");
         var n = [];
@@ -363,19 +294,20 @@ corgi.prototype.doResponse = function (view, reqt, resp, res) {
         }
     });
 };
+
 corgi.prototype.createProject = function (name, path, remotePath, localFolder, mfn) {
     if (path[path.length - 1] !== "/") {
         path = path + "/";
     }
     var p = this.basePath, q = p + "webapps/" + name + ".json";
-    bright.file(q).write(JSON.stringify({
+    topolr.file(q).write(JSON.stringify({
         name: name,
         path: path,
         remotePath: remotePath || "",
         installPath: localFolder || ""
     }, null, 4)).then(function () {
         if (!fs.existsSync(path + "WEBINF/web.json")) {
-            return bright.file(path + "WEBINF/web.json").write(JSON.stringify({
+            return topolr.file(path + "WEBINF/web.json").write(JSON.stringify({
                 page: {index: "index.html"},
                 "service": [
                     {"name": "mvcservice", "option": {
@@ -412,7 +344,7 @@ corgi.prototype.createProject = function (name, path, remotePath, localFolder, m
         }
     }).then(function () {
         if (!fs.existsSync(path + "WEBINF/src/controller.js")) {
-            return bright.file(path + "WEBINF/src/controller.js").write(
+            return topolr.file(path + "WEBINF/src/controller.js").write(
                     "/*\n" +
                     " * @packet controller;\n" +
                     " */\n" +
@@ -429,7 +361,7 @@ corgi.prototype.createProject = function (name, path, remotePath, localFolder, m
         }
     }).then(function () {
         if (!fs.existsSync(path + "index.html")) {
-            return bright.file(path + "index.html").write(
+            return topolr.file(path + "index.html").write(
                     "<!DOCTYPE html>\n" +
                     "<html>\n" +
                     "    <head>\n" +
@@ -444,7 +376,7 @@ corgi.prototype.createProject = function (name, path, remotePath, localFolder, m
         }
     }).then(function () {
         if (!fs.existsSync(path + "index.csp")) {
-            return bright.file(path + "index.csp").write(
+            return topolr.file(path + "index.csp").write(
                     "<!DOCTYPE html>\n" +
                     "<html>\n" +
                     "    <head>\n" +
@@ -460,7 +392,7 @@ corgi.prototype.createProject = function (name, path, remotePath, localFolder, m
         }
     }).then(function () {
         if (!fs.existsSync(path + "package.json")) {
-            return bright.file(path + "package.json").write(JSON.stringify({
+            return topolr.file(path + "package.json").write(JSON.stringify({
                 name: name,
                 author: "",
                 version: "0.0.1",
@@ -478,11 +410,11 @@ corgi.prototype.createProject = function (name, path, remotePath, localFolder, m
     });
 };
 corgi.prototype.listProjects = function () {
-    var path = this.basePath + "webapps", ths = this, queue = bright.queue(), ps = bright.promise(), ls = [];
+    var path = this.basePath + "webapps", ths = this, queue = topolr.queue(), ps = topolr.promise(), ls = [];
     queue.complete(function () {
         ps.resolve(ls);
     });
-    bright.file(path).getSubPaths().done(function (data) {
+    topolr.file(path).getSubPaths().done(function (data) {
         data.folder.forEach(function (pa) {
             var n = pa.substring(path.length + 1);
             ls.push({
@@ -497,7 +429,7 @@ corgi.prototype.listProjects = function () {
             if (a.indexOf(".json") !== -1) {
                 queue.add(function (a, b) {
                     var tss = this;
-                    bright.file(b).read().done(function (data) {
+                    topolr.file(b).read().done(function (data) {
                         var n = JSON.parse(data);
                         ls.push({
                             name: n.name,
@@ -518,16 +450,16 @@ corgi.prototype.listProjects = function () {
     return ps;
 };
 corgi.prototype.getAllRemoteProjects = function () {
-    var path = this.basePath + "webapps", queue = bright.queue(), ps = bright.promise(), ls = [];
+    var path = this.basePath + "webapps", queue = topolr.queue(), ps = topolr.promise(), ls = [];
     queue.complete(function () {
         ps.resolve(ls);
     });
-    bright.file(path).getSubPaths().done(function (data) {
+    topolr.file(path).getSubPaths().done(function (data) {
         data.file.forEach(function (a) {
             if (a.indexOf(".json") !== -1) {
                 queue.add(function (a, b) {
                     var tss = this;
-                    bright.file(b).read().done(function (data) {
+                    topolr.file(b).read().done(function (data) {
                         var n = JSON.parse(data);
                         if (n.remotePath) {
                             ls.push(n);
@@ -554,7 +486,7 @@ corgi.prototype.editProjectRemotePath = function (projectName, path) {
         if (t) {
             t.remotePath = path;
             var p = ths.basePath, q = p + "webapps/" + t.name + ".json";
-            bright.file(q).write(JSON.stringify(t, null, 4)).done(function () {
+            topolr.file(q).write(JSON.stringify(t, null, 4)).done(function () {
                 console.log("[corgiserver] project <" + projectName + "> remote path is edited,new is <" + path + ">");
             });
         } else {
@@ -564,18 +496,18 @@ corgi.prototype.editProjectRemotePath = function (projectName, path) {
 };
 corgi.prototype.removeProject = function (projectName) {
     if (projectName !== "ROOT") {
-        var path = this.basePath + "webapps", ths = this, queue = bright.queue(), paths = [];
+        var path = this.basePath + "webapps", ths = this, queue = topolr.queue(), paths = [];
         queue.complete(function () {
             if (paths.length > 0) {
                 paths.forEach(function (a) {
-                    bright.file(a).remove();
+                    topolr.file(a).remove();
                 });
                 console.log("[corgiserver] project removed");
             } else {
                 console.log("[corgiserver] project of " + projectName + " can not find.");
             }
         });
-        bright.file(path).getSubPaths().done(function (data) {
+        topolr.file(path).getSubPaths().done(function (data) {
             data.folder.forEach(function (pa) {
                 var n = pa.substring(path.length + 1);
                 if (n === projectName) {
@@ -587,7 +519,7 @@ corgi.prototype.removeProject = function (projectName) {
                 if (a.indexOf(".json") !== -1) {
                     queue.add(function (a, b) {
                         var tss = this;
-                        bright.file(b).read().done(function (data) {
+                        topolr.file(b).read().done(function (data) {
                             var n = JSON.parse(data);
                             if (n.name === projectName) {
                                 paths.push(q);
@@ -606,32 +538,32 @@ corgi.prototype.removeProject = function (projectName) {
     }
 };
 corgi.prototype.setServerPort = function (port) {
-    var ps = bright.promise();
-    bright.file(this.serverConfigPath).read().done(function (data) {
+    var ps = topolr.promise();
+    topolr.file(this.serverConfigPath).read().done(function (data) {
         var a = JSON.parse(data);
         a.port = parseInt(port);
-        bright.file(this.serverConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
+        topolr.file(this.serverConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
             ps.resolve();
         });
     }.bind(this));
     return ps;
 };
 corgi.prototype.setSessionTimeout = function (time) {
-    var ps = bright.promise();
-    bright.file(this.webConfigPath).read().done(function (data) {
+    var ps = topolr.promise();
+    topolr.file(this.webConfigPath).read().done(function (data) {
         var a = JSON.parse(data);
         a.session.timeout = parseInt(time);
-        bright.file(this.webConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
+        topolr.file(this.webConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
             ps.resolve();
         });
     }.bind(this));
     return ps;
 };
 corgi.prototype.getServerState = function () {
-    var ps = bright.promise();
-    bright.file(this.webConfigPath).read().done(function (data) {
+    var ps = topolr.promise();
+    topolr.file(this.webConfigPath).read().done(function (data) {
         var web = JSON.parse(data);
-        bright.file(this.serverConfigPath).read().done(function (data) {
+        topolr.file(this.serverConfigPath).read().done(function (data) {
             var server = JSON.parse(data);
             ps.resolve({
                 "server-port": server.port,
@@ -651,22 +583,22 @@ corgi.prototype.getServerState = function () {
     return ps;
 };
 corgi.prototype.enableCspCache = function () {
-    var ps = bright.promise();
-    bright.file(this.webConfigPath).read().done(function (data) {
+    var ps = topolr.promise();
+    topolr.file(this.webConfigPath).read().done(function (data) {
         var a = JSON.parse(data);
         a.cspCache = true;
-        bright.file(this.webConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
+        topolr.file(this.webConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
             ps.resolve();
         });
     }.bind(this));
     return ps;
 };
 corgi.prototype.disableCspCache = function () {
-    var ps = bright.promise();
-    bright.file(this.webConfigPath).read().done(function (data) {
+    var ps = topolr.promise();
+    topolr.file(this.webConfigPath).read().done(function (data) {
         var a = JSON.parse(data);
         a.cspCache = false;
-        bright.file(this.webConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
+        topolr.file(this.webConfigPath).write(JSON.stringify(a, null, 4)).done(function () {
             ps.resolve();
         });
     }.bind(this));
@@ -684,9 +616,6 @@ global.CorgiServer = {
     },
     getCspContent: function (path) {
         return corgiserver.cspContainer.getCspContent(path);
-    },
-    setTemplateMacro: function (key, fn) {
-        bright.setTemplateGlobalMacro(key, fn);
     }
 };
 
@@ -699,11 +628,10 @@ module.exports = {
         corgiserver.startup();
     },
     version: function () {
-        var t = fs.readFileSync(corgiserver.packagePath);
-        return JSON.parse(t).version;
+        return corgiserver.version;
     },
-    create: function (name, path, remotePath, installPath,fn) {
-        corgiserver.createProject(name, path, remotePath, installPath,fn);
+    create: function (name, path, remotePath, installPath, fn) {
+        corgiserver.createProject(name, path, remotePath, installPath, fn);
     },
     stop: function () {},
     restart: function () {},
