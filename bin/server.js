@@ -82,7 +82,7 @@ corgi.prototype.initProjects = function (code) {
         console.log("[corgiserver] project <" + a.data + "> started");
     });
     topolr.file(projectpath).subscan(function (path, isfile) {
-        if (isfile && topolr.path(path, false).suffixWidth("json")) {
+        if (isfile && topolr.path(path, false).suffixWith("json")) {
             queue.add(function (a, b) {
                 var tss = this;
                 topolr.file(b.path).read().done(function (data) {
