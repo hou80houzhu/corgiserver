@@ -1,4 +1,5 @@
 ![corgiserver](https://github.com/hou80houzhu/corgiserver/raw/master/conf/pages/corgiserver.png)  [![Build Status](https://travis-ci.org/hou80houzhu/corgiserver.svg?branch=master)](https://travis-ci.org/hou80houzhu/corgiserver)
+[![Gitter](https://badges.gitter.im/hou80houzhu/corgiserver.svg)](https://gitter.im/hou80houzhu/corgiserver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 [![NPM](https://nodei.co/npm/corgiserver.png?downloads=true)](https://nodei.co/npm/corgiserver/)
 
@@ -8,7 +9,7 @@ A web server running javascript like tomcat.
 
 corgiserver is a web server running javascript code, supports multiple projects, and ROOT as the default project. It is similar to Java Tomcat server, default resolution `.csp` file, which is a packet (specific wording javascript files) container.corgiserver is a nodejs module container.
 
-> Please refer to packet [AxesJS doc](http://axesjs.org "AxesJS")
+> Please refer to packet [BrightJS doc](http://brightjs.org "BrightJS")
 
 ## Quick Start
 
@@ -28,7 +29,7 @@ goto the project folder to build the controllers.
 
 **step 4**
 
-run the server `$ corgiserver start`
+run the server `$ corgiserver -start`
 
 
 ## Project directory structure
@@ -65,23 +66,24 @@ Would start separately configured service project when a project starts, all the
 ## web.json
 
 - **Page** for covered server default page
+- **upload** set encoding,max form size,tmp folder
 - **Service** is used to configure the service to start with the project
 - **Filter** is used to configure a request through a filter
 
 ### corgi provides predefined service
 
 - mvcservice for implementing initialization mvc functions     
-  - database database configuration 
-     - host database IP 
-     - port database port 
-     - debug debug mode is turned on 
-     - database database name 
-     - user database user name 
-     - password database password 
-     - connectionLimit the maximum number of connections
-  - view
-     - path template path 
-     - suffix suffix template
+  - **database** database configuration 
+     - **host** database IP 
+     - **port** database port 
+     - **debug** debug mode is turned on 
+     - **database** database name 
+     - **user** database user name 
+     - **password** database password 
+     - **connectionLimit** the maximum number of connections
+  - **view**
+     - **path** template path 
+     - **suffix** suffix template
 
  
 ### corgi provided predefined filter
@@ -93,9 +95,15 @@ Would start separately configured service project when a project starts, all the
 
 server config under the `conf/server.json` file control
 
-- **Host** server IP
 - **Port** server port, default 8080
 - **Modules** server load module defaults to `lib/modules/base.js`
+- **ipc** set process comunication option
+  - **socketPath** ipc socketpath
+  - **port** ipc port
+  - **host** ipc host
+- **log** set server log file path
+  - **server** server log path
+  - **daemon** daemon process log path 
 
 > Custom modules arranged in this order basis having
 
@@ -165,7 +173,7 @@ Configuration information object
 - `getFilter()`
 - `hasFilter()`
 - `hasService()`
-- `getPathPath()`
+- `getPagePath()`
 - `hasPage()`
 - `getServiceSize()`
 - `getFilterSize()`
@@ -179,3 +187,117 @@ webapps/todo how to use mysql with corgi
 webapps/test how to use controller and so on
 
 webapps/doc how to write controller and custom corgi
+
+## See the blog demo
+
+Sample blog corgiblog->[github](https://github.com/hou80houzhu/corgiblog "github")
+
+**Execute the command and then run the blog**
+
+```
+$ corgiserver install <projectName> <localFolder> https://github.com/hou80houzhu/corgiblog/archive/master.zip
+```
+> this command will download the zip file,and build it,then you can run it with corgiserver.
+> with this command you can update your site too.
+
+## Run corgiserver
+
+start without daemon process
+
+```
+$ corgiserver -run
+```
+start without corgiserver daemon process,but you can also daemon it by `nohup` in linux,or use forever.js.
+
+```
+$ nohup corgiserver -run &
+```
+start corgiserver with corgiserver daemon
+
+```
+$ corgiserver -start
+```
+
+## corgiserver useage
+
+```
+Useage:
+   version               show version
+   run                   just start without deamon process
+   ?                     help
+   help                  help
+   restart               restart server
+   start                 start server
+   stop                  close all corgiserver service
+   status                show the server running status.
+   create:<projectName>,<projectPath>
+                          create project with a projectName and its local file path
+   daemonpid             show the daemon process id
+   remove:<projectName>
+                          remove porject with projectName
+   ls                    list all the projects
+   sport:<port>
+                          set current port of corgiserver
+   ssessiontimeout:<time>
+                          set current session timeout of corgiserver
+   info                  show corgiserver info
+   encache               enable to cache csp
+   discache              disable to cache csp
+   remoteprojects        list all remote projects
+   install:<projectName>,<localFolder>,<zipPath>
+                          install a website form a zip file
+   update:[<projectName>]
+                          update all projects which has a romote path.
+   updateremotepath:<projectName>,<zipPath>
+                          update a project remote path.
+```
+
+
+## changelog
+
+- **version 0.2.0**
+  - http comet support
+  - remove mvcservice database option
+  - add daoservice
+  - add chat sample
+  - not support < 0.1 version
+- **version 0.1.13**
+  - beauty the CLI console
+- **version 0.1.12**
+  - remove colog
+  - fix CLI -update
+- **version 0.1.10**
+  - clean projects
+- **version 0.1.9**
+  - fix bugs
+- **version 0.1.8**
+  - fix bugs
+- **version 0.1.7**
+  - remove kill command
+- **version 0.1.6**
+  - fix bugs
+- **version 0.1.3**
+  - add sinlestart command
+  - fix bugs
+- **version 0.1.0**
+  - add daemon process(ipc refer to [node-easy-ipc](https://github.com/oleics/node-easy-ipc "node-easy-ipc")) 
+  - add log management
+  - add some commands
+  - add color console
+  - remove s,r,v,h command
+- **version 0.0.21**
+  - unified promise
+  - add update project command
+  - add edit project remote project command
+- **version 0.0.20**
+  - server automatically restart when downtime,In rare cases.
+  - upload files support
+- **version 0.0.19**
+  - add redirectView,customView
+  - unified version code
+
+## License
+
+Copyright (c) 2016-2017 WangJinliang
+
+[MIT License](https://github.com/hou80houzhu/corgiserver/blob/master/LICENSE "MIT License")
